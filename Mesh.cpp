@@ -1,18 +1,9 @@
-#include "Mesh.h"
+ #include "Mesh.h"
 #include <iostream>
 #include <vector>
-#include <cmath>
-std::ostream& operator<<(std::ostream& os, const Point& p) {
-    os << p.x << " " << p.y << " 0.0";
-    return os;
-};
 
-// vypis geometrie polygonu
-std::ostream& operator<<(std::ostream& os, const Polygon& p) {
-	os << p.node_id.size();
-	for (int j=p.node_id.size()-1; j>=0; j--) {
-            os << " " << p.node_id[j];
-        }
+std::ostream& operator<<(std::ostream& os, const Point& p) {
+    os << "(" << p.x << "," << p.y << ")";
     return os;
 };
 
@@ -56,13 +47,23 @@ std::vector<int> Mesh::pointCellNeighbors(int p){
 	return pointCellNeighbors;
 };
 
-double Polygon::area(){
-	double plocha, lsum, rsum;
-	for (int j=0; j<(node_id.size()-1.0); ++j) {                                   // potreuju cyklus od 0 do poctu nodu meho polygonu-1
-		lsum = lsum + mesh.node[node_id[j]].x * mesh.node[node_id[j+1]].y;
-		rsum = rsum + mesh.node[node_id[j+1]].x * mesh.node[node_id[j]].y;
-	}
-	plocha = std::abs (lsum + mesh.node[node_id[node_id.size()-1.0]].x * mesh.node[node_id[0]].y) - rsum - (mesh.node[node_id[0]].x * mesh.node[node_id[node_id.size()-1.0]].y);
-	plocha = plocha*0.5;
-	return plocha;
-}
+std::vector<std::vector<double>> Mesh::centroid(int p){
+	std::vector<std::vector<double>> centroid={};
+	
+	for(int i=0; i<cell.size();i++){
+		Polygon const& polygonTmp = cell[i];
+			std::vector<int> points_IDS= polygonTmp.node_id;
+						
+			double x1=node[points_IDS[0]].x;
+			double y1=node[points_IDS[0]].y;
+			double x2=node[points_IDS[2]].x;
+			double y2=node[points_IDS[2]].y;
+			
+			std::vector<double> coord_centroid={(x1+x2)/2.0,(y1+y2)/2.0};
+						
+			centroid.push_back(coord_centroid);
+			
+		}
+		return centroid;	
+};
+

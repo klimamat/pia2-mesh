@@ -17,10 +17,9 @@ public:
 class Polygon {
 public:
     Polygon(std::vector<int> const& _node_id, Mesh & _m) : node_id(_node_id), mesh(_m) {};
-    friend std::ostream& operator<<(std::ostream& os, const Polygon& p);
     std::vector<int> node_id;
     Mesh& mesh;
-    double area();  // trida polygon obsahuje metodu area
+//    Point centroid(int p);
 };
 
 class Mesh {
@@ -29,6 +28,8 @@ public:
     std::vector<Polygon> cell;
     std::vector<Point> node;
 	std::vector<int> pointCellNeighbors(int p);
+	std::vector<std::vector<double>> centroid(int p);
+	
 };
 
 #endif //MESH_H

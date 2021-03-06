@@ -1,6 +1,5 @@
 #include "Mesh.h"
 #include "Field.h"
-#include "output.h"
 #include <iostream>
 #include <cstdlib>
 
@@ -23,6 +22,12 @@ int main(int iargc, char* iargv[]) {
         }
         std::cout << "]\n";
     }
+    
+    std::vector<std::vector<double>> centroid;
+    for(int i=0; i<m.cell.size(); ++i){
+    	centroid=m.centroid(i);
+    	std::cout << "Cell no. " << i << " has centroid in "<< centroid[i][0] <<" "<< centroid[i][1]<<"\n";
+    }
 	
 	  Field<double> W(m);
 	
@@ -41,13 +46,6 @@ int main(int iargc, char* iargv[]) {
 		   std::cout << "\n";
 	  }
 	  
-	outputVTK("output.vtk",m,W);
-
-	double plocha;
-	for (int i=0; i<m.cell.size(); ++i) {
-		Polygon p = m.cell[i];
-		std::cout <<"Area of cell no. " << i << " is " << p.area() << "\n";
-	}
 	
     return 0;
 }
