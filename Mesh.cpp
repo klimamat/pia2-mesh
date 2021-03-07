@@ -56,10 +56,22 @@ std::vector<std::vector<double>> Mesh::centroid(int p){
 						
 			double x1=node[points_IDS[0]].x;
 			double y1=node[points_IDS[0]].y;
-			double x2=node[points_IDS[2]].x;
-			double y2=node[points_IDS[2]].y;
+			double x2=node[points_IDS[1]].x;
+			double y2=node[points_IDS[1]].y;
+			double x3=node[points_IDS[2]].x;
+			double y3=node[points_IDS[2]].y;
+			double x4=node[points_IDS[3]].x;
+			double y4=node[points_IDS[3]].y;
 			
-			std::vector<double> coord_centroid={(x1+x2)/2.0,(y1+y2)/2.0};
+			double barycenter1x=(x1+x2+x3)/3;
+			double barycenter2x=(x3+x4+x1)/3;
+			double barycenter1y=(y2+y3+y4)/3;
+			double barycenter2y=(y3+y4+y1)/3;;
+			
+			double centroid_result_x=(barycenter1x+barycenter2x)/2;
+			double centroid_result_y=(barycenter1y+barycenter2y)/2;
+			
+			std::vector<double> coord_centroid={centroid_result_x,centroid_result_y};
 						
 			centroid.push_back(coord_centroid);
 			

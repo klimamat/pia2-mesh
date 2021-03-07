@@ -26,7 +26,7 @@ int main(int iargc, char* iargv[]) {
     std::vector<std::vector<double>> centroid;
     for(int i=0; i<m.cell.size(); ++i){
     	centroid=m.centroid(i);
-    	std::cout << "Cell no. " << i << " has centroid in "<< centroid[i][0] <<" "<< centroid[i][1]<<"\n";
+    	std::cout << "Cell no. " << i << " has centroid in "<< " [ " << centroid[i][0] <<" "<< centroid[i][1]<< " ] "<<"\n";
     }
 	
 	  Field<double> W(m);
