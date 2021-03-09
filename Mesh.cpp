@@ -67,11 +67,12 @@ double Polygon::area(){
 	return plocha;
 }
 
-// number of nodes
-
-int Mesh::nCellNodes();
-	for (int i=0; i<node.size();i++){
- 	nCellNodes = ncellNodes.getCount(i);
-  	cout << "Sum of nodes is" << nCellNodes();
-    
+	// number of nodes
+int Mesh::nCellNodes(){
+	int CellNodes;
+	for (int i=0; i<m.cell.size(); ++i) {
+           	CellNodes = p.node_id.size();
+		nCellNodes = CellNodes.getCount(i);	
+}
 return nCellNodes;
+};
