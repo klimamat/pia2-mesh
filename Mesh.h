@@ -29,6 +29,7 @@ public:
     std::vector<Polygon> cell;
     std::vector<Point> node;
 	std::vector<int> pointCellNeighbors(int p);
+	std::vector<int> nCellNodes;
 };
 
 #endif //MESH_H
