@@ -1,6 +1,7 @@
 #include "Mesh.h"
 #include "Field.h"
 #include "output.h"
+#include "Compressible.h"
 #include <iostream>
 #include <cstdlib>
 
@@ -63,6 +64,10 @@ int main(int iargc, char* iargv[]) {
 	for(auto &e : m.edge) {
 	  std::cout << e.n1 << " " << e.n2 << "\n";
 	}
+	
+	Compressible U(1, 3, 4, 1e06);
+	
+	std::cout << "Preassure = " << U.p() << "\n";
 	
     return 0;
 }
