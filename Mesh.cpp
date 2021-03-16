@@ -69,10 +69,10 @@ double Polygon::area(){
 
 	// number of nodes
 int Mesh::nCellNodes(){
-	int CellNodes, TotNodes;
+	int CellNodes, TotNodes = 0;
 	for (int i=0; i<m.cell.size(); ++i) {
-           	CellNodes = p.node_id.size();
-		TotNodes = CellNodes.getCount(i);	
+           	CellNodes = p.node_id.size(i);
+		TotNodes += CellNodes;	
 }
 return TotNodes;
 };
