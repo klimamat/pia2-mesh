@@ -84,9 +84,7 @@ double Polygon::area(){
 	return plocha;
 }
 
-std::vector<Point>  Polygon::centroid(){
-	std::vector<Point> centroid;
-							
+Point Polygon::centroid(){
 			double x1=mesh.node[node_id[0]].x;
 			double y1=mesh.node[node_id[0]].y;
 			double x2=mesh.node[node_id[1]].x;
@@ -103,10 +101,8 @@ std::vector<Point>  Polygon::centroid(){
 			
 			double area1=x1*(y2-y3)+x2*(y3-y1)+x3*(y1-y2);
 			double area2=x3*(y4-y1)+x4*(y1-y3)+x1*(y3-y4);
-			
-			centroid.push_back({(barycenter1x*area1+barycenter2x*area2)/(area1+area2), (barycenter1y*area1+barycenter2y*area2)/(area1+area2)});
 									
-	return centroid;
+	return {(barycenter1x*area1+barycenter2x*area2)/(area1+area2), (barycenter1y*area1+barycenter2y*area2)/(area1+area2)};
 }
 
 //test konvexnosti bunky (1 = je konvexni; 0 = neni konvexni)

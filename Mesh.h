@@ -18,7 +18,7 @@ public:
     std::vector<int> node_id;
     Mesh& mesh;
     double area();  // trida polygon obsahuje metodu area
-    std::vector<Point> centroid();
+    Point centroid();
     bool isConvex();
     double edgeLength(int i); 
 };
@@ -57,4 +57,3 @@ public:
 };
 
 #endif //MESH_H
-
