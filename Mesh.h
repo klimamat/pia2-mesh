@@ -37,8 +37,8 @@ public:
 	Vector2D normal() const;
 	Vector2D unitNormal() const;
 	// double length();
-	int left() const { return cl; };
-	int right() const { return cr; };
+	int left() const;
+	int right() const;
 private:
 	Mesh const& mesh;
 	int cl, cr;
@@ -54,6 +54,7 @@ public:
     void generateEdges();
     std::set<int> boundaryNodes;
     void randomize(double r);
+	std::vector<std::vector<int> > edgeNeighbors() const;
 };
 
 #endif //MESH_H
