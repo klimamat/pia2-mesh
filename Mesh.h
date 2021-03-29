@@ -17,10 +17,10 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const Polygon& p);
     std::vector<int> node_id;
     Mesh& mesh;
-    double area();  // trida polygon obsahuje metodu area
-    Point centroid();
-    bool isConvex();
-    double edgeLength(int i); 
+    double area() const;  // trida polygon obsahuje metodu area
+    Point centroid() const;
+    bool isConvex() const;
+    double edgeLength(int i) const; 
 };
 
 class Edge{ //stejne jako class ale automaticky vse public
@@ -50,7 +50,7 @@ public:
     std::vector<Polygon> cell;
     std::vector<Point> node;
     std::vector<Edge> edge;
-    std::vector<int> pointCellNeighbors(int p);
+    std::vector<int> pointCellNeighbors(int p) const;
     void generateEdges();
     std::set<int> boundaryNodes;
     void randomize(double r);

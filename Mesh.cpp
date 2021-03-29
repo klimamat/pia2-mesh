@@ -55,7 +55,7 @@ void Mesh::randomize(double r){
 	return;
 }
 
-std::vector<int> Mesh::pointCellNeighbors(int p){
+std::vector<int> Mesh::pointCellNeighbors(int p) const {
 	std::vector<int> pointCellNeighbors;
 
 	if (p < 0 || p >= node.size()){
@@ -73,7 +73,7 @@ std::vector<int> Mesh::pointCellNeighbors(int p){
 	return pointCellNeighbors;
 };
 
-double Polygon::area(){
+double Polygon::area() const {
 	double plocha, lsum, rsum;
 	for (int j=0; j<node_id.size()-1; ++j) {                                   // potreuju cyklus od 0 do poctu nodu meho polygonu-1
 		lsum = lsum + mesh.node[node_id[j]].x * mesh.node[node_id[j+1]].y;
@@ -84,7 +84,7 @@ double Polygon::area(){
 	return plocha;
 }
 
-Point Polygon::centroid(){
+Point Polygon::centroid() const {
 			double x1=mesh.node[node_id[0]].x;
 			double y1=mesh.node[node_id[0]].y;
 			double x2=mesh.node[node_id[1]].x;
@@ -106,7 +106,7 @@ Point Polygon::centroid(){
 }
 
 //test konvexnosti bunky (1 = je konvexni; 0 = neni konvexni)
-bool Polygon::isConvex(){
+bool Polygon::isConvex() const {
 	bool isConvex;
 	double u11, u12, u21, u22, v11, v12, v21, v22, u31, u32, v31, v32, w13, w23, w33; 
 	//prvni index = 1 - tyka se cyklu pres vsechny uzly krome poslednich dvou
@@ -205,7 +205,7 @@ void Mesh::generateEdges(){
 }
 
 //delka hrany bunky
-double Polygon::edgeLength(int i){	
+double Polygon::edgeLength(int i) const {	
 double edgeLength;
 if(i==(node_id.size()-1)){	
 	edgeLength = sqrt(pow((mesh.node[node_id[0]].x-mesh.node[node_id[i]].x),2)+pow((mesh.node[node_id[0]].y-mesh.node[node_id[i]].y),2));
@@ -227,7 +227,7 @@ std::vector<std::vector<int>> Mesh::edgeNeighbors() const{
 	std::vector<int> pointCellNeighbors_n2;
 	
 	for(int i=0;i < edge.size();++i) {
-		Edge& e = edge[i];
+		Edge const& e = edge[i];
 		
 		int n1 = e.n1;
 		int n2 = e.n2;
@@ -267,7 +267,7 @@ int Edge::left() const{
 	int cl =0;
 		
 	for(int i=0;i < mesh.edge.size();++i) {
-		Edge& e = mesh.edge[i];
+		Edge const& e = mesh.edge[i];
 		
 		Vector2D normal_vektor = mesh.edge[i].normal();
 		std::vector<std::vector<int>> edgeNeighbors = mesh.edgeNeighbors();
@@ -324,7 +324,7 @@ int Edge::right() const {
 	int cr =0;
 	
 	for(int i=0;i < mesh.edge.size();++i) {
-		Edge& e = mesh.edge[i];
+		Edge const& e = mesh.edge[i];
 		
 		Vector2D normal_vektor = mesh.edge[i].normal();
 		std::vector<std::vector<int>> edgeNeighbors = mesh.edgeNeighbors();
