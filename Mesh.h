@@ -39,9 +39,9 @@ public:
 	// double length();
 	int left() const;
 	int right() const;
+	int cl, cr;
 private:
 	Mesh const& mesh;
-	int cl, cr;
 };
 
 class Mesh {
@@ -52,6 +52,7 @@ public:
     std::vector<Edge> edge;
     std::vector<int> pointCellNeighbors(int p) const;
     void generateEdges();
+    void initLeftRight();
     std::set<int> boundaryNodes;
     void randomize(double r);
 	std::vector<std::vector<int> > edgeNeighbors() const;
