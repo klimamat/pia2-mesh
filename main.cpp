@@ -26,7 +26,7 @@ int main(int iargc, char* iargv[]) {
 		
 		t += dt;
 	}
-	
+
 	outputVTK("output.vtk",*m,*W);
 
 	delete m; delete W;
