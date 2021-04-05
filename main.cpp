@@ -51,18 +51,4 @@ int main(int iargc, char* iargv[]) {
 	
     return 0;
 	
-	// number of nodes
-
-int Mesh::nCellNodes(){
-int Mesh::CellNodes(){
-	for (int i=0; i<m.cell.size(); ++i) {
-        Polygon const& p = m.cell[i];
-        for (int j=1; j<p.node_id.size(); ++j) {
-            p.CellNodes = p.node_id[j];
-}
-        nCellNodes = p.CellNodes.getCount(i);
-}
-return nCellNodes;
-}
-}	
 }
