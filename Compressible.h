@@ -16,6 +16,7 @@ public:
     double p() const;
     double c() const;
     Vector2D u() const;
+    double eos_e_from_p(double p_in) const; // Calculate total energy density from the EOS using pressure value
 };
 
 inline Compressible operator+(Compressible const& a, Compressible const& b) {
@@ -27,9 +28,13 @@ inline Compressible operator-(Compressible const& a, Compressible const& b) {
 inline Compressible operator*(double a, Compressible const& b) {
 	return Compressible(a*b.rho,a*b.rhoU.x,a*b.rhoU.y,a*b.e);
 }
+inline Compressible operator*(Compressible const& b, double a) {
+	return Compressible(a*b.rho,a*b.rhoU.x,a*b.rhoU.y,a*b.e);
+}
 
 Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne);
 double timestep(Mesh const& m, Field<Compressible> const& W);
 void FVMstep(Mesh const& m, Field<Compressible> & W, double dt);
+void applyBC(Mesh const& m, Field<Compressible> & W);
 
 #endif // COMPRESSIBLE_H

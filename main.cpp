@@ -7,9 +7,6 @@
 #include <cstdlib>
 
 int main(int iargc, char* iargv[]) {
-
-    int nx = 20;
-    int ny = 20;
     
     Mesh *m;
     Field<Compressible> *W;
@@ -17,13 +14,15 @@ int main(int iargc, char* iargv[]) {
 	initSod(m,W);
 	
 	double dt, t = 0.0;
-	const double t_max = 1.0;
+	const double t_max = 0.1;
 	int n = 0;
 	
 	while (t < t_max) {
 		dt = timestep(*m,*W);
 		
 		FVMstep(*m,*W,dt);
+		
+		applyBC(*m,*W);
 		
 		n++;
 		std::cout << "Step " << n << ", dt = " << dt << "\n";

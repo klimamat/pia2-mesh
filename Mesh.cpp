@@ -230,6 +230,7 @@ return edgeLength;
 
 Vector2D Edge::normal() const { return Vector2D(mesh.node[n1],mesh.node[n2]).normal(); }
 Vector2D Edge::unitNormal() const { return Vector2D(mesh.node[n1],mesh.node[n2]).unitNormal(); }
+Point Edge::center() const { return Point(0.5*(mesh.node[n1].x+mesh.node[n2].x),0.5*(mesh.node[n1].y+mesh.node[n2].y)); }
 
 // pomocny 2D vektor (cislo_hrany,soused_1,soused_2)
 std::vector<std::vector<int>> Mesh::edgeNeighbors() const {
@@ -291,46 +292,16 @@ void Mesh::initLeftRight() {
 		int n2_id = e.n2;	//volani cisla bodu n2 hrany i
 		int Neighbors_id = en[i][1];
 		Point centroid = cell[Neighbors_id].centroid();
-						
-		double n1_x = node[n1_id].x;	//x souradnice bodu n1
-		double n1_y = node[n1_id].y;	//y souradnice bodu n1
-		double n2_x = node[n2_id].x; 	//x souradnice bodu n1
-		double n2_y = node[n2_id].y;	//y souradnice bodu n2
-		double T_x =  centroid.x;	//souradnioce teziste
-		double T_y = centroid.y;	//souradnioce teziste
-		double tx = T_x-n1_x;	// slozka x vektoru (teziste,n1)
-		double ty =	T_y-n1_y;	// slozka y vektoru (teziste,n1)
-		double nx = normal_vektor.x;	// slozka x normal vektoru 
-		double ny = normal_vektor.y;	// slozka y normal vektoru 
-		
-		double abs_norm = sqrt(pow((nx),2)+pow((ny ),2));	// velikost normaly
-		double abs_stred = sqrt(pow((tx),2)+pow((ty),2));	// velikost usecky n1,teziste
-		double angle = acos(((nx*tx+ny*ty))/(abs_stred*abs_norm));	// uhel [rad]
+		Vector2D n1_c = Vector2D(node[n1_id],centroid);
 		 
-		if(angle < M_PI_2){
-			cl = en[i][1];
-		}
-		else {
-			cr = en[i][1];
-		}
-		 
-		if ( en[i].size() == 3){		//kdyz bude velikost radku = 3, tak:
-			int Neighbors_id_2 = en[i][2];
-			Point centroid_2 = cell[Neighbors_id].centroid();
-				
-			double T_2_x = centroid_2.x; 	//souradnioce teziste
-			double T_2_y = centroid_2.y;	//souradnioce teziste
-			double t_2x = T_2_x-n1_x; 	// slozka x vektoru (teziste,n1)
-			double t_2y = T_2_y-n1_y;	// slozka y vektoru (teziste,n1)	
-			
-			double abs_stred2 = sqrt(pow((t_2x),2)+pow((t_2y),2));	// velikost usecky n1,teziste
-			double angle2 = acos(((nx*t_2x+ny*t_2y))/(abs_stred2*abs_norm));	// uhel [rad]
-				
-			if (angle2 < M_PI_2){
-				cl = en[i][2];
+		if ( en[i].size() == 3){		//kdyz bude velikost radku = 3, tak:		 
+			if(dot(n1_c,normal_vektor) > 0){
+				cl = en[i][1];
+				cr = en[i][2];
 			}
 			else {
-				cr = en[i][2];
+				cr = en[i][1];
+				cl = en[i][2];
 			}
 		}
 		else {	// pro krajni hranu vzdy bunka vlevo 

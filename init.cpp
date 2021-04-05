@@ -1,7 +1,7 @@
 #include "init.h"
 
 void initSod(Mesh *& m, Field<Compressible> *& W) {
-	int nx = 200;
+	int nx = 1000;
 	m = new Mesh(0.,1.,0.,1./double(nx),nx,1);
 	W = new Field<Compressible>(*m); 
 			
@@ -9,7 +9,7 @@ void initSod(Mesh *& m, Field<Compressible> *& W) {
 		Polygon const& T_x = m->cell[i];
 		double rho, e, p;
 		Vector2D u;
-		if(T_x.centroid().x >= 0.5){
+		if(T_x.centroid().x < 0.5){
 			rho = 1.0;
 			u = {0.0,0.0};
 			p = 1.0;
@@ -21,6 +21,6 @@ void initSod(Mesh *& m, Field<Compressible> *& W) {
 		}
 			(*W)[i].rho = rho;
 			(*W)[i].rhoU = rho*u;
-			(*W)[i].e = p / (Compressible::kappa - 1.0) + 0.5 * rho * dot(u,u);
+			(*W)[i].e = p / (Compressible::kappa - 1.0) - 0.5 * rho * dot(u,u);
 	}							
 }

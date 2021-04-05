@@ -66,6 +66,7 @@ void outputVTK(std::string filename, Mesh const& m, Field<Compressible> const& u
 		f << "9\n";
 	}
 	
+	f << "CELL_DATA " << m.cell.size() << "\n";
  	f << "SCALARS rho float\n"; 
 	f << "LOOKUP_TABLE default\n";
 
@@ -73,18 +74,19 @@ void outputVTK(std::string filename, Mesh const& m, Field<Compressible> const& u
 		f << u[i].rho << "\n";
 	}
 
- 	f << "SCALARS |u| float\n"; 
+ 	//f << "SCALARS |u| float\n"; 
+	//f << "LOOKUP_TABLE default\n";
+
+    //for (int i=0; i<m.cell.size(); ++i) {
+	//	f << u[i].u() << "\n";
+	//}		
+
+	//f << "VECTORS u float\n"; 
+ 	f << "SCALARS u float 3\n"; 
 	f << "LOOKUP_TABLE default\n";
 
     for (int i=0; i<m.cell.size(); ++i) {
-		f << u[i].rhoU.norm()/u[i].rho << "\n";
-	}		
-
- 	f << "VECTORS u float\n"; 
-	f << "LOOKUP_TABLE default\n";
-
-    for (int i=0; i<m.cell.size(); ++i) {
-		f << u[i].rhoU.x/u[i].rho << ", " << u[i].rhoU.y/u[i].rho << ", 0" << "\n";
+		f << u[i].u().x << " " << u[i].u().y << " 0" << "\n";
 	}	
 
  	f << "SCALARS e float\n"; 
