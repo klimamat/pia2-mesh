@@ -29,7 +29,7 @@ int main(int iargc, char* iargv[]) {
 		std::cout << "Step " << n << ", dt = " << dt << "\n";
 		t += dt;
 	}
-	
+
 	outputVTK("output.vtk",*m,*W);
 
 	delete m; delete W;

@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Field.h"
 #include "Compressible.h"
+#include "Vector2D.h"
 #include <string>
 
 void outputVTK(std::string filename, Mesh const& m, Field<double> const& u);

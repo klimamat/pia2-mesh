@@ -85,7 +85,17 @@ double Polygon::area() const {
 	return plocha;
 }
 
-Point Polygon::centroid() const {
+	// number of nodes
+int Mesh::nCellNodes(){
+	int CellNodes, TotNodes = 0;
+	for (int i=0; i<m.cell.size(); ++i) {
+           	CellNodes = m.cell[i].node_id.size();
+		TotNodes = TotNodes + CellNodes;	
+}
+return TotNodes;
+};
+
+Point Polygon::centroid(){
 			double x1=mesh.node[node_id[0]].x;
 			double y1=mesh.node[node_id[0]].y;
 			double x2=mesh.node[node_id[1]].x;

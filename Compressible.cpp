@@ -72,12 +72,20 @@ double timestep(Mesh const& m, Field<Compressible> const& W) {
 }
 
 void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
-
+	
 	Field<Compressible> res(m);
 	
-	for (int i=0;i<m.edge.size();++i) {
-		std::cout << "[" << m.edge[i].cl << ", " << m.edge[i].cr << "]\n";
+	for(int j=0;i < m.edge.size(); ++j){
+		int l = m.edge[j].left();  // Index of the cell on the left
+		int r = m.edge[j].right(); // Index of the cell on the right
+		Compressible F = fluxUpwind(W[l],W[r],m.edge[j].normal());
+		if (r != -1) {
+			res[l] = res[l] + F;
+			res[r] = res[r] - F;
+		}
 	}
 	
-	
+	for(int j=0;j < m.cell.size(); ++j){
+		W[j] = W[j]-(dt/m.cell[j].area())*res[j];
+	}
 }

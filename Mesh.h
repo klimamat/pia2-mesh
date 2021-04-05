@@ -49,6 +49,7 @@ public:
     Mesh(double xl, double xr, double yl, double yr, int nx, int ny);
     std::vector<Polygon> cell;
     std::vector<Point> node;
+	  int nCellNodes();
     std::vector<Edge> edge;
     std::vector<int> pointCellNeighbors(int p) const;
     void generateEdges();
