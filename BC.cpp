@@ -2,7 +2,7 @@
 
 void SlipWallBC::apply(Mesh const& m, Field<Compressible> & W) {
 	for (auto const& e : m.edge) {
-		if (e.location == location_id) {
+		if (isCorrectLocation(e.location)) {
 			int cl = e.left();
 			int cr = e.right();
 			Vector2D en = e.unitNormal();

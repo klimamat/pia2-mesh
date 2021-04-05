@@ -4,7 +4,7 @@ void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>
 	int nx = 1000;
 	m = new Mesh(0.,1.,0.,1./double(nx),nx,1);
 	W = new Field<Compressible>(*m); 
-	boundary_conds.push_back(new SlipWallBC());
+	boundary_conds.push_back(new SlipWallBC({1}));
 			
 	for (int i=0; i<m->nc; ++i) {
 		Polygon const& T_x = m->cell[i];
