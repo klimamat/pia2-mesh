@@ -8,11 +8,9 @@ double Compressible::epsilon() const{
 	return e/rho+0.5*uSq;
 }
 double Compressible::p() const{
-	double kappa = 1.4;
 	return (kappa-1)*rho*epsilon();
 }
 double Compressible::c() const {
-	double kappa = 1.4;
 	return std::sqrt(kappa*p()/rho);
 }
 Vector2D Compressible::u() const {
@@ -75,7 +73,7 @@ void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 	
 	Field<Compressible> res(m);
 	
-	for(int j=0;i < m.edge.size(); ++j){
+	for(int j=0;j< m.edge.size(); ++j){
 		int l = m.edge[j].left();  // Index of the cell on the left
 		int r = m.edge[j].right(); // Index of the cell on the right
 		Compressible F = fluxUpwind(W[l],W[r],m.edge[j].normal());
