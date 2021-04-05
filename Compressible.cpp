@@ -8,15 +8,16 @@ double Compressible::epsilon() const{
 	return e/rho+0.5*uSq;
 }
 double Compressible::p() const{
-	double kappa = 1.4;
 	return (kappa-1)*rho*epsilon();
 }
 double Compressible::c() const {
-	double kappa = 1.4;
 	return std::sqrt(kappa*p()/rho);
 }
 Vector2D Compressible::u() const {
 	return rhoU/rho;
+}
+double Compressible::eos_e_from_p(double p) const {
+	return p / (kappa - 1.0) - 0.5 * rho * dot(u(),u());
 }
 
 Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
@@ -31,9 +32,7 @@ Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
 		F=Wr;
 	}
 	
-	F.rho=F.rho*dot(ue,ne);
-	F.rhoU=F.rhoU*dot(ue,ne);
-	F.e=F.e*dot(ue,ne);
+	F = F * dot(ue,ne);
 	
 	double pe=0.5*(Wl.p()+Wr.p());
 	
@@ -45,14 +44,14 @@ Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
 
 
 double timestep(Mesh const& m, Field<Compressible> const& W) {
-	const double cfl = 0.9;
+	const double cfl = 0.4;
 	double dt = 1e12;
 	
 	for (int i=0;i<m.cell.size();++i) {
 		Polygon const& p = m.cell[i];
-		Vector2D u = W[i].u();
-		double c = W[i].c();
-		double lambda = 0;
+		Vector2D u = W[i].u(); // Fluid velocity
+		double c = W[i].c();   // Sound speed
+		double lambda = 0.0;
 		
 		for (int j=0;j<p.node_id.size();++j) {
 			int j2; 
@@ -63,7 +62,6 @@ double timestep(Mesh const& m, Field<Compressible> const& W) {
 			Vector2D e = Vector2D(n1,n2);
 			lambda += std::fabs(dot(u,e.normal())) + c*e.norm();
 		}
-		
 		double dt_i = cfl * p.area() / lambda;
 		if (dt_i < dt) dt = dt_i;
 	}
@@ -71,11 +69,33 @@ double timestep(Mesh const& m, Field<Compressible> const& W) {
 	return dt;
 }
 
+void applyBC(Mesh const& m, Field<Compressible> & W) {
+	for (auto const& e : m.edge) {
+		if (e.right() == -1) {
+			int cl = e.left();
+			double ecx = e.center().x;
+			if (std::fabs(ecx) < 1.0e-6) { // Edges on the left side of the domain
+				W[cl].rho = 1.0;
+				W[cl].rhoU = {0.0,0.0};
+				W[cl].e = W[cl].eos_e_from_p(1.0);
+			}
+			else if (std::fabs(ecx - 1.0) < 1.0e-6) { // Edges on the right side of the domain
+				W[cl].rho = 0.125;
+				W[cl].rhoU = {0.0,0.0};
+				W[cl].e = W[cl].eos_e_from_p(0.1);
+			}
+			else { // Edges on top/bottom
+				W[cl].rhoU.y = 0.0;
+			}
+		}
+	}
+}
+
 void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 	
 	Field<Compressible> res(m);
 	
-	for(int j=0;i < m.edge.size(); ++j){
+	for(int j=0;j< m.edge.size(); ++j){
 		int l = m.edge[j].left();  // Index of the cell on the left
 		int r = m.edge[j].right(); // Index of the cell on the right
 		Compressible F = fluxUpwind(W[l],W[r],m.edge[j].normal());

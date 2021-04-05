@@ -36,6 +36,7 @@ public:
     bool operator== (const Edge &other) const { return std::fabs(hash - other.hash) < 1.0e-8; };
 	Vector2D normal() const;
 	Vector2D unitNormal() const;
+	Point center() const;
 	// double length();
 	int left() const;
 	int right() const;
