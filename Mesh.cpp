@@ -16,6 +16,8 @@ std::ostream& operator<<(std::ostream& os, const Polygon& p) {
 Mesh::Mesh(double xl, double xr, double yl, double yr, int nx, int ny) {
     double dx = (xr - xl)/double(nx);
     double dy = (yr - yl)/double(ny);
+    
+    nc = nx*ny;
 
     // Create nodes
     for (int i=0; i<nx+1; ++i) {
@@ -36,6 +38,13 @@ Mesh::Mesh(double xl, double xr, double yl, double yr, int nx, int ny) {
 
     generateEdges();
     initLeftRight();
+    addGhostCells();
+    
+    // Mark boundary edges as location=1
+    for (auto& e : edge) {
+    	if (e.boundary) e.location = 1;
+    	else e.location = 0;
+    }
 };
 
 //random posuv uzlu o r
@@ -298,19 +307,36 @@ void Mesh::initLeftRight() {
 			if(dot(n1_c,normal_vektor) > 0){
 				cl = en[i][1];
 				cr = en[i][2];
+				e.boundary = false;
 			}
 			else {
 				cr = en[i][1];
 				cl = en[i][2];
+				e.boundary = false;
 			}
 		}
 		else {	// pro krajni hranu vzdy bunka vlevo 
 			cl = en[i][1];
 			cr = -1;
+			e.boundary = true;
+			if(dot(n1_c,normal_vektor) < 0) {
+				e.n1 = n2_id;
+				e.n2 = n1_id;
+			}
 		}
 		
 		e.cl = cl;
 		e.cr = cr;
+	}
+}
+
+// Create ghost cells mirroring internal cells on boundary edges
+void Mesh::addGhostCells() {
+	for (auto& e : edge) {
+		if (e.boundary) {
+			e.cr = cell.size();
+			cell.push_back(Polygon({e.n1,e.n2},*this));
+		}
 	}
 }
 

@@ -1,11 +1,12 @@
 #include "init.h"
 
-void initSod(Mesh *& m, Field<Compressible> *& W) {
+void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds) {
 	int nx = 1000;
 	m = new Mesh(0.,1.,0.,1./double(nx),nx,1);
 	W = new Field<Compressible>(*m); 
+	boundary_conds.push_back(new SlipWallBC());
 			
-	for (int i=0; i<m->cell.size(); ++i) {
+	for (int i=0; i<m->nc; ++i) {
 		Polygon const& T_x = m->cell[i];
 		double rho, e, p;
 		Vector2D u;
@@ -22,5 +23,7 @@ void initSod(Mesh *& m, Field<Compressible> *& W) {
 			(*W)[i].rho = rho;
 			(*W)[i].rhoU = rho*u;
 			(*W)[i].e = p / (Compressible::kappa - 1.0) - 0.5 * rho * dot(u,u);
-	}							
+	}			
+	
+	for (auto bc : boundary_conds) bc->apply(*m,*W);				
 }

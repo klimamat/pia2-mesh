@@ -16,23 +16,23 @@ void outputVTK(std::string filename, Mesh const& m, Field<double> const& u) {
 		f << m.node[i] << "\n";
 	}
 	
-	f << "cells " << m.cell.size() << " " << 5*m.cell.size() << "\n"; // TODO: upravit az bude funkce nCellNodes
+	f << "cells " << m.nc << " " << 5*m.nc << "\n"; // TODO: upravit az bude funkce nCellNodes
 	
-	for (int i=0; i<m.cell.size(); ++i) {
+	for (int i=0; i<m.nc; ++i) {
 		f << m.cell[i] << "\n";
 	}
 	
-	f << "cell_types " << m.cell.size() << "\n";
+	f << "cell_types " << m.nc << "\n";
 	
-	for (int i=0; i<m.cell.size(); ++i) {
+	for (int i=0; i<m.nc; ++i) {
 		f << "9\n";
 	}
 	
-	f << "CELL_DATA " << m.cell.size() << "\n";
+	f << "CELL_DATA " << m.nc << "\n";
  	f << "SCALARS u float\n"; 
 	f << "LOOKUP_TABLE default\n";
 	
-    for (int i=0; i<m.cell.size(); ++i) {
+    for (int i=0; i<m.nc; ++i) {
 		f << u[i] << "\n";
 	}
 	
@@ -54,45 +54,45 @@ void outputVTK(std::string filename, Mesh const& m, Field<Compressible> const& u
 		f << m.node[i] << "\n";
 	}
 	
-	f << "cells " << m.cell.size() << " " << 5*m.cell.size() << "\n"; // TODO: upravit az bude funkce nCellNodes
+	f << "cells " << m.nc << " " << 5*m.nc << "\n"; // TODO: upravit az bude funkce nCellNodes
 	
-	for (int i=0; i<m.cell.size(); ++i) {
+	for (int i=0; i<m.nc; ++i) {
 		f << m.cell[i] << "\n";
 	}
 	
-	f << "cell_types " << m.cell.size() << "\n";
+	f << "cell_types " << m.nc << "\n";
 	
-	for (int i=0; i<m.cell.size(); ++i) {
+	for (int i=0; i<m.nc; ++i) {
 		f << "9\n";
 	}
 	
-	f << "CELL_DATA " << m.cell.size() << "\n";
+	f << "CELL_DATA " << m.nc << "\n";
  	f << "SCALARS rho float\n"; 
 	f << "LOOKUP_TABLE default\n";
 
-    for (int i=0; i<m.cell.size(); ++i) {
+    for (int i=0; i<m.nc; ++i) {
 		f << u[i].rho << "\n";
 	}
 
  	//f << "SCALARS |u| float\n"; 
 	//f << "LOOKUP_TABLE default\n";
 
-    //for (int i=0; i<m.cell.size(); ++i) {
-	//	f << u[i].u() << "\n";
+    //for (int i=0; i<m.nc; ++i) {
+	//	f << u[i].u().norm() << "\n";
 	//}		
 
 	//f << "VECTORS u float\n"; 
  	f << "SCALARS u float 3\n"; 
 	f << "LOOKUP_TABLE default\n";
 
-    for (int i=0; i<m.cell.size(); ++i) {
+    for (int i=0; i<m.nc; ++i) {
 		f << u[i].u().x << " " << u[i].u().y << " 0" << "\n";
 	}	
 
  	f << "SCALARS e float\n"; 
 	f << "LOOKUP_TABLE default\n";
 
-    for (int i=0; i<m.cell.size(); ++i) {
+    for (int i=0; i<m.nc; ++i) {
 		f << u[i].e << "\n";
 	}
 

@@ -35,6 +35,5 @@ inline Compressible operator*(Compressible const& b, double a) {
 Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne);
 double timestep(Mesh const& m, Field<Compressible> const& W);
 void FVMstep(Mesh const& m, Field<Compressible> & W, double dt);
-void applyBC(Mesh const& m, Field<Compressible> & W);
 
 #endif // COMPRESSIBLE_H

@@ -4,7 +4,8 @@
 #include "Mesh.h"
 #include "Field.h"
 #include "Compressible.h"
+#include "BC.h"
 
-void initSod(Mesh *& m, Field<Compressible> *& W); 
+void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds); 
 
 #endif

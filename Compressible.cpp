@@ -47,7 +47,7 @@ double timestep(Mesh const& m, Field<Compressible> const& W) {
 	const double cfl = 0.4;
 	double dt = 1e12;
 	
-	for (int i=0;i<m.cell.size();++i) {
+	for (int i=0;i<m.nc;++i) {
 		Polygon const& p = m.cell[i];
 		Vector2D u = W[i].u(); // Fluid velocity
 		double c = W[i].c();   // Sound speed
@@ -69,43 +69,21 @@ double timestep(Mesh const& m, Field<Compressible> const& W) {
 	return dt;
 }
 
-void applyBC(Mesh const& m, Field<Compressible> & W) {
-	for (auto const& e : m.edge) {
-		if (e.right() == -1) {
-			int cl = e.left();
-			double ecx = e.center().x;
-			if (std::fabs(ecx) < 1.0e-6) { // Edges on the left side of the domain
-				W[cl].rho = 1.0;
-				W[cl].rhoU = {0.0,0.0};
-				W[cl].e = W[cl].eos_e_from_p(1.0);
-			}
-			else if (std::fabs(ecx - 1.0) < 1.0e-6) { // Edges on the right side of the domain
-				W[cl].rho = 0.125;
-				W[cl].rhoU = {0.0,0.0};
-				W[cl].e = W[cl].eos_e_from_p(0.1);
-			}
-			else { // Edges on top/bottom
-				W[cl].rhoU.y = 0.0;
-			}
-		}
-	}
-}
-
 void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 	
 	Field<Compressible> res(m);
 	
-	for(int j=0;j< m.edge.size(); ++j){
-		int l = m.edge[j].left();  // Index of the cell on the left
-		int r = m.edge[j].right(); // Index of the cell on the right
-		Compressible F = fluxUpwind(W[l],W[r],m.edge[j].normal());
-		if (r != -1) {
-			res[l] = res[l] + F;
+	for (auto const& e : m.edge) {
+		int l = e.left();  // Index of the cell on the left
+		int r = e.right(); // Index of the cell on the right
+		Compressible F = fluxUpwind(W[l],W[r],e.normal());
+		res[l] = res[l] + F;
+		if (!e.boundary) {
 			res[r] = res[r] - F;
 		}
 	}
 	
-	for(int j=0;j < m.cell.size(); ++j){
+	for(int j=0;j<m.nc; ++j){
 		W[j] = W[j]-(dt/m.cell[j].area())*res[j];
 	}
 }
