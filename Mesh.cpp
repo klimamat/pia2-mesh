@@ -242,9 +242,9 @@ std::vector<std::vector<int>> Mesh::edgeNeighbors() const {
 		
 		int n1 = e.n1;
 		int n2 = e.n2;
-		int Neighbor1 =0;
+		int Neighbor1 =-2;
 		int Neighbor2 =-1;
-		int t = 10;
+		int t = -3;
 		
 		pointCellNeighbors_n1 = pointCellNeighbors(n1);
 		pointCellNeighbors_n2 = pointCellNeighbors(n2);
@@ -278,10 +278,10 @@ void Mesh::initLeftRight() {
 	std::vector<std::vector<int>> en = edgeNeighbors();
 		
 	for(int i=0;i < edge.size();++i) {
-		if ( en[i].size() == 3)
-			std::cout << en[i][1] << "," << en[i][2] << "\n";
-		else
-			std::cout << en[i][1] << "\n";
+		//if ( en[i].size() == 3)
+		//	std::cout << en[i][1] << "," << en[i][2] << "\n";
+		//else
+		//	std::cout << en[i][1] << "\n";
 		int cl = 0;
 		int cr = 0;
 		Edge & e = edge[i];
