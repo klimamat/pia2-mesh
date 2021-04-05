@@ -1,5 +1,6 @@
 #include "Compressible.h"
 #include "Vector2D.h"
+#include <iostream>
 
 double Compressible::epsilon() const{
 	Vector2D u=rhoU/rho;
@@ -9,6 +10,13 @@ double Compressible::epsilon() const{
 double Compressible::p() const{
 	double kappa = 1.4;
 	return (kappa-1)*rho*epsilon();
+}
+double Compressible::c() const {
+	double kappa = 1.4;
+	return std::sqrt(kappa*p()/rho);
+}
+Vector2D Compressible::u() const {
+	return rhoU/rho;
 }
 
 Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
@@ -37,7 +45,30 @@ Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
 
 
 double timestep(Mesh const& m, Field<Compressible> const& W) {
+	const double cfl = 0.9;
+	double dt = 1e12;
 	
+	for (int i=0;i<m.cell.size();++i) {
+		Polygon const& p = m.cell[i];
+		Vector2D u = W[i].u();
+		double c = W[i].c();
+		double lambda = 0;
+		
+		for (int j=0;j<p.node_id.size();++j) {
+			int j2; 
+			if (j == p.node_id.size() - 1) j2 = 0;
+			else j2 = j + 1;
+			Point const& n1 = m.node[p.node_id[j]];
+			Point const& n2 = m.node[p.node_id[j2]];
+			Vector2D e = Vector2D(n1,n2);
+			lambda += std::fabs(dot(u,e.normal())) + c*e.norm();
+		}
+		
+		double dt_i = cfl * p.area() / lambda;
+		if (dt_i < dt) dt = dt_i;
+	}
+	
+	return dt;
 }
 
 void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {

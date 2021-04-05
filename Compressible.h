@@ -13,6 +13,8 @@ public:
     Vector2D rhoU;
     double epsilon() const;
     double p() const;
+    double c() const;
+    Vector2D u() const;
 };
 
 Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne);

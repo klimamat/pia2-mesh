@@ -18,12 +18,15 @@ int main(int iargc, char* iargv[]) {
 	
 	double dt, t = 0.0;
 	const double t_max = 1.0;
+	int n = 0;
 	
 	while (t < t_max) {
 		dt = timestep(*m,*W);
 		
 		FVMstep(*m,*W,dt);
 		
+		n++;
+		std::cout << "Step " << n << ", dt = " << dt << "\n";
 		t += dt;
 	}
 
