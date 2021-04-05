@@ -71,7 +71,7 @@ double Polygon::area(){
 int Mesh::nCellNodes(){
 	int CellNodes, TotNodes = 0;
 	for (int i=0; i<m.cell.size(); ++i) {
-           	CellNodes = p.node_id.size();
+           	CellNodes = m.cell[i].node_id.size();
 		TotNodes = TotNodes + CellNodes;	
 }
 return TotNodes;
