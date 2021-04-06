@@ -29,3 +29,20 @@ void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>
 	
 	for (auto bc : boundary_conds) bc->apply(*m,*W);				
 }
+
+void initJet(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds) {
+	m = new MeshGmsh("jet.msh");
+	W = new Field<Compressible>(*m); 
+	boundary_conds.push_back(new SlipWallBC({1}));
+	boundary_conds.push_back(new ReservoirBC({2}));
+			
+	for (int i=0; i<m->nc; ++i) {
+		Polygon const& T_x = m->cell[i];
+			
+			(*W)[i].rho = 1.0;
+			(*W)[i].rhoU = Vector2D(0.0,0.0);
+			(*W)[i].e = (*W)[i].eos_e_from_p(0.1);
+	}			
+	
+	for (auto bc : boundary_conds) bc->apply(*m,*W);				
+}

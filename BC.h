@@ -23,4 +23,10 @@ public:
 	virtual void apply(Mesh const& m, Field<Compressible> & W);
 };
 
+class ReservoirBC : public BC<Compressible> {
+public:
+	using BC::BC; // C++11 directive for inheritance of BC class constructors
+	virtual void apply(Mesh const& m, Field<Compressible> & W);
+};
+
 #endif

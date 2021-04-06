@@ -54,7 +54,6 @@ public:
     std::vector<Polygon> cell;
     int nc; // Number of internal (non-ghost) cells
     
-    
     std::vector<Point> node;
     std::vector<int> pointCellNeighbors(int p) const;
 	int nCellNodes() const; // Total number of all cell corners

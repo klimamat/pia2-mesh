@@ -93,8 +93,22 @@ void outputVTK(std::string filename, Mesh const& m, Field<Compressible> const& u
 	f << "LOOKUP_TABLE default\n";
 
     for (int i=0; i<m.nc; ++i) {
-		f << u[i].e << "\n";
+		f << u[i].epsilon() << "\n";
 	}
+	
+	f << "SCALARS p float\n"; 
+	f << "LOOKUP_TABLE default\n";
+
+    for (int i=0; i<m.nc; ++i) {
+		f << u[i].p() << "\n";
+	}
+	
+ 	f << "SCALARS x float 3\n"; 
+	f << "LOOKUP_TABLE default\n";
+
+    for (int i=0; i<m.nc; ++i) {
+		f << m.cell[i].centroid() << "\n";
+	}	
 
 	f.close();
 }

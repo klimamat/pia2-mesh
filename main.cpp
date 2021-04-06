@@ -11,14 +11,15 @@ int main(int iargc, char* iargv[]) {
     
     Mesh *m;
     Field<Compressible> *W;
-    std::vector<BC<Compressible>*> boundary_conds;
+    std::vector<BC<Compressible>*> boundary_conds; // Array of boundary conditions
     
-	initSod(m,W,boundary_conds);
+	//initSod(m,W,boundary_conds);
+	initJet(m,W,boundary_conds);
 	
 	outputVTK("output_init.vtk",*m,*W);
 	
 	double dt, t = 0.0;
-	const double t_max = 0.1;
+	const double t_max = 0.5;
 	int n = 0;
 	
 	while (t < t_max) {
