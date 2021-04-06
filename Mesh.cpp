@@ -89,15 +89,15 @@ double Polygon::area() const {
 		lsum = lsum + mesh.node[node_id[j]].x * mesh.node[node_id[j+1]].y;
 		rsum = rsum + mesh.node[node_id[j+1]].x * mesh.node[node_id[j]].y;
 	}
-	plocha = std::abs (lsum + mesh.node[node_id[node_id.size()-1]].x * mesh.node[node_id[0]].y) - rsum - (mesh.node[node_id[0]].x * mesh.node[node_id[node_id.size()-1]].y);
+	plocha = lsum + mesh.node[node_id[node_id.size()-1]].x * mesh.node[node_id[0]].y - rsum - mesh.node[node_id[0]].x * mesh.node[node_id[node_id.size()-1]].y;
 	plocha = plocha*0.5;
 	return plocha;
 }
 
 	// number of nodes
-int Mesh::nCellNodes(){
+int Mesh::nCellNodes() const {
 	int CellNodes, TotNodes = 0;
-	for (int i=0; i<cell.size(); ++i) {
+	for (int i=0; i<nc; ++i) {
         CellNodes = cell[i].node_id.size();
 		TotNodes = TotNodes + CellNodes;	
 }
@@ -105,24 +105,29 @@ return TotNodes;
 };
 
 Point Polygon::centroid() const {
-			double x1=mesh.node[node_id[0]].x;
-			double y1=mesh.node[node_id[0]].y;
-			double x2=mesh.node[node_id[1]].x;
-			double y2=mesh.node[node_id[1]].y;
-			double x3=mesh.node[node_id[2]].x;
-			double y3=mesh.node[node_id[2]].y;
-			double x4=mesh.node[node_id[3]].x;
-			double y4=mesh.node[node_id[3]].y;
-			
-			double barycenter1x=(x1+x2+x3)/3;
-			double barycenter2x=(x3+x4+x1)/3;
-			double barycenter1y=(y1+y2+y3)/3;
-			double barycenter2y=(y3+y4+y1)/3;
-			
-			double area1=x1*(y2-y3)+x2*(y3-y1)+x3*(y1-y2);
-			double area2=x3*(y4-y1)+x4*(y1-y3)+x1*(y3-y4);
-									
-	return {(barycenter1x*area1+barycenter2x*area2)/(area1+area2), (barycenter1y*area1+barycenter2y*area2)/(area1+area2)};
+	//double xsum = 0.0, ysum = 0.0;
+	//for (int j=0; j<node_id.size(); ++j) {
+	//	int j1 = j; int j2;
+	//	if (j == node_id.size() - 1 ) j2 = 0; else j2 = j+1;
+	//	Point n1 = mesh.node[node_id[j1]];
+	//	Point n2 = mesh.node[node_id[j2]];
+	//	xsum += (n2.y-n1.y)*(n1.x*n1.x + n1.x*n2.x + n2.x*n2.x);
+	//	ysum += (n2.x-n1.x)*(n1.y*n1.y + n1.y*n2.y + n2.y*n2.y);
+	//}
+	
+	Point x_ref = mesh.node[node_id[node_id.size()-1]];
+	auto center = Vector2D(0.0,0.0);
+	double volume = 0.0;                                            //the normal vector are on zero value.
+	for(int i=1; i<node_id.size(); i++){
+        Point a = mesh.node[node_id[i-1]];           //dividing of the face into triangles,
+        Point b = mesh.node[node_id[i]];
+        double v_tri = (a.x-x_ref.x)*(b.y-x_ref.y) - (b.x-x_ref.x)*(a.y-x_ref.y);          //computation of normal vectors of each triangle
+        double vol = v_tri / 2.0;                 //computation of each triangle measure
+        volume += vol;                                     //summation of these measures, it's face measure
+        center = center + Vector2D(vol*(a.x+b.x+x_ref.x)/3.0, vol*(a.y+b.y+x_ref.y)/3.0);                     //summation of triangle centers of gravity multiplied by
+    }                                                      //triangle measure
+    center = center / volume;  
+	return Point(center.x,center.y);
 }
 
 //test konvexnosti bunky (1 = je konvexni; 0 = neni konvexni)

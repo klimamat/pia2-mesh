@@ -1,4 +1,5 @@
 #include "BC.h"
+#include <iostream>
 
 void SlipWallBC::apply(Mesh const& m, Field<Compressible> & W) {
 	for (auto const& e : m.edge) {

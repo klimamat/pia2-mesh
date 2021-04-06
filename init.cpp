@@ -1,8 +1,10 @@
 #include "init.h"
+#include "MeshGmsh.h"
 
 void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds) {
-	int nx = 1000;
-	m = new Mesh(0.,1.,0.,1./double(nx),nx,1);
+	//int nx = 1000;
+	//m = new Mesh(0.,1.,0.,1./double(nx),nx,1);
+	m = new MeshGmsh("square.msh");
 	W = new Field<Compressible>(*m); 
 	boundary_conds.push_back(new SlipWallBC({1}));
 			

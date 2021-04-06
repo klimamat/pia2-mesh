@@ -26,8 +26,8 @@ public:
 class Edge{ //stejne jako class ale automaticky vse public
 public:
 	Edge(int _n1, int _n2, double _hash, Mesh const& _m) : n1(_n1), n2(_n2), hash(_hash), mesh(_m) {};
-	Edge(Edge const& e) : n1(e.n1), n2(e.n2), hash(e.hash), mesh(e.mesh), cl(e.cl), cr(e.cr), boundary(e.boundary) {}; // Je nutne specifikovat kopirovaci konstruktor a prirazovaci op.
-	Edge& operator=(Edge const& e) { n1 = e.n1; n2 = e.n2; hash = e.hash; cl = e.cl; cr = e.cr; boundary = e.boundary; return *this;}; 
+	Edge(Edge const& e) : n1(e.n1), n2(e.n2), hash(e.hash), mesh(e.mesh), cl(e.cl), cr(e.cr), boundary(e.boundary), location(e.location) {}; // Je nutne specifikovat kopirovaci konstruktor a prirazovaci op.
+	Edge& operator=(Edge const& e) { n1 = e.n1; n2 = e.n2; hash = e.hash; cl = e.cl; cr = e.cr; boundary = e.boundary; location = e.location; return *this;}; 
 	virtual ~Edge() {};
 	double hash;
 	int n1, n2;
@@ -49,6 +49,7 @@ private:
 
 class Mesh {
 public:
+	Mesh() {};
     Mesh(double xl, double xr, double yl, double yr, int nx, int ny);
     std::vector<Polygon> cell;
     int nc; // Number of internal (non-ghost) cells
@@ -56,7 +57,7 @@ public:
     
     std::vector<Point> node;
     std::vector<int> pointCellNeighbors(int p) const;
-	int nCellNodes(); // Total number of all cell corners
+	int nCellNodes() const; // Total number of all cell corners
 	
     std::vector<Edge> edge;
     void generateEdges();

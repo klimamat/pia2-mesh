@@ -15,6 +15,8 @@ int main(int iargc, char* iargv[]) {
     
 	initSod(m,W,boundary_conds);
 	
+	outputVTK("output_init.vtk",*m,*W);
+	
 	double dt, t = 0.0;
 	const double t_max = 0.1;
 	int n = 0;

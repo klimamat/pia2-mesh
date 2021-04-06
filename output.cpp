@@ -16,7 +16,7 @@ void outputVTK(std::string filename, Mesh const& m, Field<double> const& u) {
 		f << m.node[i] << "\n";
 	}
 	
-	f << "cells " << m.nc << " " << 5*m.nc << "\n"; // TODO: upravit az bude funkce nCellNodes
+	f << "cells " << m.nc << " " << m.nCellNodes() + m.nc << "\n";
 	
 	for (int i=0; i<m.nc; ++i) {
 		f << m.cell[i] << "\n";
@@ -54,7 +54,7 @@ void outputVTK(std::string filename, Mesh const& m, Field<Compressible> const& u
 		f << m.node[i] << "\n";
 	}
 	
-	f << "cells " << m.nc << " " << 5*m.nc << "\n"; // TODO: upravit az bude funkce nCellNodes
+	f << "cells " << m.nc << " " << m.nCellNodes() + m.nc << "\n"; // TODO: upravit az bude funkce nCellNodes
 	
 	for (int i=0; i<m.nc; ++i) {
 		f << m.cell[i] << "\n";
