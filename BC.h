@@ -7,6 +7,7 @@ template <typename T>
 class BC {
 public:
 	BC(std::vector<int> loc_in) : locations(loc_in) {};
+	virtual ~BC() {};
 	std::vector<int> locations;
 	bool isCorrectLocation(int loc) { 
 		for (int l : locations) { 
@@ -20,12 +21,14 @@ public:
 class SlipWallBC : public BC<Compressible> {
 public:
 	using BC::BC; // C++11 directive for inheritance of BC class constructors
+	virtual ~SlipWallBC() {};
 	virtual void apply(Mesh const& m, Field<Compressible> & W);
 };
 
 class ReservoirBC : public BC<Compressible> {
 public:
 	using BC::BC; // C++11 directive for inheritance of BC class constructors
+	virtual ~ReservoirBC() {};
 	virtual void apply(Mesh const& m, Field<Compressible> & W);
 };
 

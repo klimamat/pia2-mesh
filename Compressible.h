@@ -9,6 +9,7 @@ class Compressible {
 public:
     Compressible() : rho(0.0), rhoU(0.0,0.0), e(0.0) {};
     Compressible(double _rho, double _rhoux, double _rhouy, double _e) : rho(_rho), rhoU(_rhoux,_rhouy), e(_e) {};
+    Compressible(double _rho, Vector2D _rhou, double _e) : rho(_rho), rhoU(_rhou), e(_e) {};
 	constexpr static double kappa = 1.4;
     double rho, e;
     Vector2D rhoU;
@@ -30,6 +31,9 @@ inline Compressible operator*(double a, Compressible const& b) {
 }
 inline Compressible operator*(Compressible const& b, double a) {
 	return Compressible(a*b.rho,a*b.rhoU.x,a*b.rhoU.y,a*b.e);
+}
+inline Compressible operator/(Compressible const& b, double a) {
+	return Compressible(b.rho/a,b.rhoU.x/a,b.rhoU.y/a,b.e/a);
 }
 
 Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne);

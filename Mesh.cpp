@@ -36,6 +36,7 @@ Mesh::Mesh(double xl, double xr, double yl, double yr, int nx, int ny) {
         }
     }
 
+	initPointCellNeighbors();
     generateEdges();
     initLeftRight();
     addGhostCells();
@@ -65,26 +66,18 @@ void Mesh::randomize(double r){
 	return;
 }
 
-std::vector<int> Mesh::pointCellNeighbors(int p) const {
-	std::vector<int> pointCellNeighbors;
-
-	if (p < 0 || p >= node.size()){
-		std::cout << "Warning: selected point does not exist.";
-	}
-
+void Mesh::initPointCellNeighbors() {
 	for(int i=0; i<cell.size();i++){
-		Polygon const& polygonTmp = cell[i];
-		for(int j=0; j<polygonTmp.node_id.size(); j++){
-			if (polygonTmp.node_id[j]==p){
-				pointCellNeighbors.push_back(i);
-			}
+		Polygon const& p = cell[i];
+		for(int j=0; j<p.node_id.size(); j++){
+			Point& n = node[p.node_id[j]];
+			n.cell_ngbr.push_back(i);
 		}
 	}
-	return pointCellNeighbors;
-};
+}
 
 double Polygon::area() const {
-	double plocha, lsum, rsum;
+	double plocha, lsum = 0.0, rsum = 0.0;
 	for (int j=0; j<node_id.size()-1; ++j) {                                   // potreuju cyklus od 0 do poctu nodu meho polygonu-1
 		lsum = lsum + mesh.node[node_id[j]].x * mesh.node[node_id[j+1]].y;
 		rsum = rsum + mesh.node[node_id[j+1]].x * mesh.node[node_id[j]].y;
@@ -246,14 +239,12 @@ Vector2D Edge::normal() const { return Vector2D(mesh.node[n1],mesh.node[n2]).nor
 Vector2D Edge::unitNormal() const { return Vector2D(mesh.node[n1],mesh.node[n2]).unitNormal(); }
 Point Edge::center() const { return Point(0.5*(mesh.node[n1].x+mesh.node[n2].x),0.5*(mesh.node[n1].y+mesh.node[n2].y)); }
 
-// pomocny 2D vektor (cislo_hrany,soused_1,soused_2)
-std::vector<std::vector<int>> Mesh::edgeNeighbors() const {
-	std::vector<std::vector<int>> edgeNeighbors;
-	std::vector<int> pointCellNeighbors_n1;
-	std::vector<int> pointCellNeighbors_n2;
-	
+void Mesh::initLeftRight() {
+		
 	for(int i=0;i < edge.size();++i) {
-		Edge const& e = edge[i];
+		int cl = 0;
+		int cr = 0;
+		Edge & e = edge[i];
 		
 		int n1 = e.n1;
 		int n2 = e.n2;
@@ -261,72 +252,37 @@ std::vector<std::vector<int>> Mesh::edgeNeighbors() const {
 		int Neighbor2 =-1;
 		int t = -3;
 		
-		pointCellNeighbors_n1 = pointCellNeighbors(n1);
-		pointCellNeighbors_n2 = pointCellNeighbors(n2);
+		std::vector<int> c1 = node[n1].cell_ngbr;
+		std::vector<int> c2 = node[n2].cell_ngbr;
 
-		for (int j=0; j<pointCellNeighbors_n1.size();++j) {
+		std::sort(c1.begin(),c1.end());
+		std::sort(c2.begin(),c2.end());
+		std::vector<int> cn;
+		std::set_intersection(c1.begin(),c1.end(),c2.begin(),c2.end(),back_inserter(cn));
 		
-			for (int k=0; k<pointCellNeighbors_n2.size();++k) {
-			
-				if( t != i && pointCellNeighbors_n1[j] == pointCellNeighbors_n2[k]){
-				
-					Neighbor1 = pointCellNeighbors_n1[j];
-					t=i;
-				}
-				else if( pointCellNeighbors_n1[j] != Neighbor1 && pointCellNeighbors_n1[j] == pointCellNeighbors_n2[k]){
-				
-					Neighbor2 = pointCellNeighbors_n1[j];
-				}
-			}
-		}
-		if ( Neighbor2 == -1) {
-			edgeNeighbors.push_back({i,Neighbor1});
-		}
-		else {
-			edgeNeighbors.push_back({i,Neighbor1,Neighbor2});	//format 2Dvektoru: (cislo_hrany,soused_1,soused_2)
-		}
-	}
-	return edgeNeighbors;
-}
-
-void Mesh::initLeftRight() {
-	std::vector<std::vector<int>> en = edgeNeighbors();
+		Vector2D normal_vektor = e.normal();
+		Point centroid = cell[cn[0]].centroid();
+		Vector2D n1_c = Vector2D(node[n1],centroid);
 		
-	for(int i=0;i < edge.size();++i) {
-		//if ( en[i].size() == 3)
-		//	std::cout << en[i][1] << "," << en[i][2] << "\n";
-		//else
-		//	std::cout << en[i][1] << "\n";
-		int cl = 0;
-		int cr = 0;
-		Edge & e = edge[i];
-		
-		Vector2D normal_vektor = edge[i].normal();
-		int n1_id = e.n1;	//volani cisla bodu n1 hrany i
-		int n2_id = e.n2;	//volani cisla bodu n2 hrany i
-		int Neighbors_id = en[i][1];
-		Point centroid = cell[Neighbors_id].centroid();
-		Vector2D n1_c = Vector2D(node[n1_id],centroid);
-		 
-		if ( en[i].size() == 3){		//kdyz bude velikost radku = 3, tak:		 
-			if(dot(n1_c,normal_vektor) > 0){
-				cl = en[i][1];
-				cr = en[i][2];
-				e.boundary = false;
-			}
-			else {
-				cr = en[i][1];
-				cl = en[i][2];
-				e.boundary = false;
-			}
-		}
-		else {	// pro krajni hranu vzdy bunka vlevo 
-			cl = en[i][1];
+		if (cn.size() == 1) { // pro krajni hranu vzdy bunka vlevo 
+			cl = cn[0];
 			cr = -1;
 			e.boundary = true;
 			if(dot(n1_c,normal_vektor) < 0) {
-				e.n1 = n2_id;
-				e.n2 = n1_id;
+				e.n1 = n2;
+				e.n2 = n1;
+			}
+		}
+		else { //kdyz bude velikost radku = 3, tak:		 
+			if(dot(n1_c,normal_vektor) > 0){
+				cl = cn[0];
+				cr = cn[1];
+				e.boundary = false;
+			}
+			else {
+				cr = cn[0];
+				cl = cn[1];
+				e.boundary = false;
 			}
 		}
 		

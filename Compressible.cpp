@@ -5,7 +5,7 @@
 double Compressible::epsilon() const{
 	Vector2D u=rhoU/rho;
 	double uSq=dot(u,u);
-	return e/rho+0.5*uSq;
+	return e/rho-0.5*uSq;
 }
 double Compressible::p() const{
 	return (kappa-1)*rho*epsilon();
@@ -17,7 +17,7 @@ Vector2D Compressible::u() const {
 	return rhoU/rho;
 }
 double Compressible::eos_e_from_p(double p) const {
-	return p / (kappa - 1.0) - 0.5 * rho * dot(u(),u());
+	return p / (kappa - 1.0) + 0.5 * rho * dot(u(),u());
 }
 
 Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
@@ -41,7 +41,6 @@ Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
 		
 	return F;
 }
-
 
 double timestep(Mesh const& m, Field<Compressible> const& W) {
 	const double cfl = 0.4;

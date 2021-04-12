@@ -78,6 +78,7 @@ MeshGmsh::MeshGmsh(const std::string& name) {
   nc = cell.size();
   std::cout << "Reading " << cell.size() << " cells" << std::endl;
   
+  initPointCellNeighbors();
   generateEdges();
   initLeftRight();
   addGhostCells();

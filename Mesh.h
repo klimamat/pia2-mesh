@@ -55,10 +55,10 @@ public:
     int nc; // Number of internal (non-ghost) cells
     
     std::vector<Point> node;
-    std::vector<int> pointCellNeighbors(int p) const;
 	int nCellNodes() const; // Total number of all cell corners
 	
     std::vector<Edge> edge;
+	void initPointCellNeighbors();
     void generateEdges();
     void initLeftRight();
     void addGhostCells();

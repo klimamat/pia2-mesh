@@ -2,9 +2,9 @@
 #include "MeshGmsh.h"
 
 void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds) {
-	//int nx = 1000;
-	//m = new Mesh(0.,1.,0.,1./double(nx),nx,1);
-	m = new MeshGmsh("square.msh");
+	int nx = 1000;
+	m = new Mesh(0.,1.,0.,1./double(nx),nx,1);
+	//m = new MeshGmsh("square.msh");
 	W = new Field<Compressible>(*m); 
 	boundary_conds.push_back(new SlipWallBC({1}));
 			
@@ -24,7 +24,7 @@ void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>
 		}
 			(*W)[i].rho = rho;
 			(*W)[i].rhoU = rho*u;
-			(*W)[i].e = p / (Compressible::kappa - 1.0) - 0.5 * rho * dot(u,u);
+			(*W)[i].e = (*W)[i].eos_e_from_p(p);
 	}			
 	
 	for (auto bc : boundary_conds) bc->apply(*m,*W);				
