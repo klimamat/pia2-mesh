@@ -16,6 +16,8 @@ std::ostream& operator<<(std::ostream& os, const Polygon& p) {
 Mesh::Mesh(double xl, double xr, double yl, double yr, int nx, int ny) {
     double dx = (xr - xl)/double(nx);
     double dy = (yr - yl)/double(ny);
+    
+    nc = nx*ny;
 
     // Create nodes
     for (int i=0; i<nx+1; ++i) {
@@ -34,7 +36,16 @@ Mesh::Mesh(double xl, double xr, double yl, double yr, int nx, int ny) {
         }
     }
 
+	initPointCellNeighbors();
     generateEdges();
+    initLeftRight();
+    addGhostCells();
+    
+    // Mark boundary edges as location=1
+    for (auto& e : edge) {
+    	if (e.boundary) e.location = 1;
+    	else e.location = 0;
+    }
 };
 
 //random posuv uzlu o r
@@ -55,58 +66,65 @@ void Mesh::randomize(double r){
 	return;
 }
 
-std::vector<int> Mesh::pointCellNeighbors(int p){
-	std::vector<int> pointCellNeighbors;
-
-	if (p < 0 || p >= node.size()){
-		std::cout << "Warning: selected point does not exist.";
-	}
-
+void Mesh::initPointCellNeighbors() {
 	for(int i=0; i<cell.size();i++){
-		Polygon const& polygonTmp = cell[i];
-		for(int j=0; j<polygonTmp.node_id.size(); j++){
-			if (polygonTmp.node_id[j]==p){
-				pointCellNeighbors.push_back(i);
-			}
+		Polygon const& p = cell[i];
+		for(int j=0; j<p.node_id.size(); j++){
+			Point& n = node[p.node_id[j]];
+			n.cell_ngbr.push_back(i);
 		}
 	}
-	return pointCellNeighbors;
-};
+}
 
-double Polygon::area(){
-	double plocha, lsum, rsum;
+double Polygon::area() const {
+	double plocha, lsum = 0.0, rsum = 0.0;
 	for (int j=0; j<node_id.size()-1; ++j) {                                   // potreuju cyklus od 0 do poctu nodu meho polygonu-1
 		lsum = lsum + mesh.node[node_id[j]].x * mesh.node[node_id[j+1]].y;
 		rsum = rsum + mesh.node[node_id[j+1]].x * mesh.node[node_id[j]].y;
 	}
-	plocha = std::abs (lsum + mesh.node[node_id[node_id.size()-1]].x * mesh.node[node_id[0]].y) - rsum - (mesh.node[node_id[0]].x * mesh.node[node_id[node_id.size()-1]].y);
+	plocha = lsum + mesh.node[node_id[node_id.size()-1]].x * mesh.node[node_id[0]].y - rsum - mesh.node[node_id[0]].x * mesh.node[node_id[node_id.size()-1]].y;
 	plocha = plocha*0.5;
 	return plocha;
 }
 
-Point Polygon::centroid(){
-			double x1=mesh.node[node_id[0]].x;
-			double y1=mesh.node[node_id[0]].y;
-			double x2=mesh.node[node_id[1]].x;
-			double y2=mesh.node[node_id[1]].y;
-			double x3=mesh.node[node_id[2]].x;
-			double y3=mesh.node[node_id[2]].y;
-			double x4=mesh.node[node_id[3]].x;
-			double y4=mesh.node[node_id[3]].y;
-			
-			double barycenter1x=(x1+x2+x3)/3;
-			double barycenter2x=(x3+x4+x1)/3;
-			double barycenter1y=(y1+y2+y3)/3;
-			double barycenter2y=(y3+y4+y1)/3;
-			
-			double area1=x1*(y2-y3)+x2*(y3-y1)+x3*(y1-y2);
-			double area2=x3*(y4-y1)+x4*(y1-y3)+x1*(y3-y4);
-									
-	return {(barycenter1x*area1+barycenter2x*area2)/(area1+area2), (barycenter1y*area1+barycenter2y*area2)/(area1+area2)};
+	// number of nodes
+int Mesh::nCellNodes() const {
+	int CellNodes, TotNodes = 0;
+	for (int i=0; i<nc; ++i) {
+        CellNodes = cell[i].node_id.size();
+		TotNodes = TotNodes + CellNodes;	
+}
+return TotNodes;
+};
+
+Point Polygon::centroid() const {
+	//double xsum = 0.0, ysum = 0.0;
+	//for (int j=0; j<node_id.size(); ++j) {
+	//	int j1 = j; int j2;
+	//	if (j == node_id.size() - 1 ) j2 = 0; else j2 = j+1;
+	//	Point n1 = mesh.node[node_id[j1]];
+	//	Point n2 = mesh.node[node_id[j2]];
+	//	xsum += (n2.y-n1.y)*(n1.x*n1.x + n1.x*n2.x + n2.x*n2.x);
+	//	ysum += (n2.x-n1.x)*(n1.y*n1.y + n1.y*n2.y + n2.y*n2.y);
+	//}
+	
+	Point x_ref = mesh.node[node_id[node_id.size()-1]];
+	auto center = Vector2D(0.0,0.0);
+	double volume = 0.0;                                            //the normal vector are on zero value.
+	for(int i=1; i<node_id.size(); i++){
+        Point a = mesh.node[node_id[i-1]];           //dividing of the face into triangles,
+        Point b = mesh.node[node_id[i]];
+        double v_tri = (a.x-x_ref.x)*(b.y-x_ref.y) - (b.x-x_ref.x)*(a.y-x_ref.y);          //computation of normal vectors of each triangle
+        double vol = v_tri / 2.0;                 //computation of each triangle measure
+        volume += vol;                                     //summation of these measures, it's face measure
+        center = center + Vector2D(vol*(a.x+b.x+x_ref.x)/3.0, vol*(a.y+b.y+x_ref.y)/3.0);                     //summation of triangle centers of gravity multiplied by
+    }                                                      //triangle measure
+    center = center / volume;  
+	return Point(center.x,center.y);
 }
 
 //test konvexnosti bunky (1 = je konvexni; 0 = neni konvexni)
-bool Polygon::isConvex(){
+bool Polygon::isConvex() const {
 	bool isConvex;
 	double u11, u12, u21, u22, v11, v12, v21, v22, u31, u32, v31, v32, w13, w23, w33; 
 	//prvni index = 1 - tyka se cyklu pres vsechny uzly krome poslednich dvou
@@ -205,7 +223,7 @@ void Mesh::generateEdges(){
 }
 
 //delka hrany bunky
-double Polygon::edgeLength(int i){	
+double Polygon::edgeLength(int i) const {	
 double edgeLength;
 if(i==(node_id.size()-1)){	
 	edgeLength = sqrt(pow((mesh.node[node_id[0]].x-mesh.node[node_id[i]].x),2)+pow((mesh.node[node_id[0]].y-mesh.node[node_id[i]].y),2));
@@ -219,3 +237,76 @@ return edgeLength;
 
 Vector2D Edge::normal() const { return Vector2D(mesh.node[n1],mesh.node[n2]).normal(); }
 Vector2D Edge::unitNormal() const { return Vector2D(mesh.node[n1],mesh.node[n2]).unitNormal(); }
+Point Edge::center() const { return Point(0.5*(mesh.node[n1].x+mesh.node[n2].x),0.5*(mesh.node[n1].y+mesh.node[n2].y)); }
+
+void Mesh::initLeftRight() {
+		
+	for(int i=0;i < edge.size();++i) {
+		int cl = 0;
+		int cr = 0;
+		Edge & e = edge[i];
+		
+		int n1 = e.n1;
+		int n2 = e.n2;
+		int Neighbor1 =-2;
+		int Neighbor2 =-1;
+		int t = -3;
+		
+		std::vector<int> c1 = node[n1].cell_ngbr;
+		std::vector<int> c2 = node[n2].cell_ngbr;
+
+		std::sort(c1.begin(),c1.end());
+		std::sort(c2.begin(),c2.end());
+		std::vector<int> cn;
+		std::set_intersection(c1.begin(),c1.end(),c2.begin(),c2.end(),back_inserter(cn));
+		
+		Vector2D normal_vektor = e.normal();
+		Point centroid = cell[cn[0]].centroid();
+		Vector2D n1_c = Vector2D(node[n1],centroid);
+		
+		if (cn.size() == 1) { // pro krajni hranu vzdy bunka vlevo 
+			cl = cn[0];
+			cr = -1;
+			e.boundary = true;
+			if(dot(n1_c,normal_vektor) < 0) {
+				e.n1 = n2;
+				e.n2 = n1;
+			}
+		}
+		else { //kdyz bude velikost radku = 3, tak:		 
+			if(dot(n1_c,normal_vektor) > 0){
+				cl = cn[0];
+				cr = cn[1];
+				e.boundary = false;
+			}
+			else {
+				cr = cn[0];
+				cl = cn[1];
+				e.boundary = false;
+			}
+		}
+		
+		e.cl = cl;
+		e.cr = cr;
+	}
+}
+
+// Create ghost cells mirroring internal cells on boundary edges
+void Mesh::addGhostCells() {
+	for (auto& e : edge) {
+		if (e.boundary) {
+			e.cr = cell.size();
+			cell.push_back(Polygon({e.n1,e.n2},*this));
+		}
+	}
+}
+
+// funkce: soused vlevo
+int Edge::left() const{
+	return cl;	
+}
+
+// funkce: soused vpravo
+int Edge::right() const{
+	return cr;	
+}
