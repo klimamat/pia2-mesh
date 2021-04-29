@@ -8,5 +8,6 @@
 
 void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds); 
 void initJet(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds); 
+void initKH(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds); 
 
 #endif

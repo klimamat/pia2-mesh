@@ -26,7 +26,34 @@ void ReservoirBC::apply(Mesh const& m, Field<Compressible> & W) {
 			
 			W[cr].rho = 1.0;
 			W[cr].rhoU = Vector2D(0.0,0.0);
-			W[cr].e = W[cr].eos_e_from_p(1.0);
+			W[cr].e = W[cr].eos_e_from_p(1);
 		}
 	}
 }
+
+void puBC::apply(Mesh const& m, Field<Compressible> & W) {
+	for (auto const& e : m.edge) {
+		if (isCorrectLocation(e.location)) {
+			int cl = e.left();  // Internal cell index
+			int cr = e.right(); // Ghost cell index
+			
+			W[cr].rho = W[cl].rho;
+			W[cr].rhoU = W[cl].rho*Vector2D(0.5,0.0);
+			W[cr].e = W[cl].e;
+		}
+	}
+}
+
+void muBC::apply(Mesh const& m, Field<Compressible> & W) {
+	for (auto const& e : m.edge) {
+		if (isCorrectLocation(e.location)) {
+			int cl = e.left();  // Internal cell index
+			int cr = e.right(); // Ghost cell index
+			
+			W[cr].rho = W[cl].rho;
+			W[cr].rhoU = W[cl].rho*Vector2D(-0.5,0.0);
+			W[cr].e = W[cl].e;
+		}
+	}
+}
+
