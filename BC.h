@@ -32,6 +32,20 @@ public:
 	virtual void apply(Mesh const& m, Field<Compressible> & W);
 };
 
+class puBC : public BC<Compressible> {
+public:
+	using BC::BC; // C++11 directive for inheritance of BC class constructors
+	virtual ~puBC() {};
+	virtual void apply(Mesh const& m, Field<Compressible> & W);
+};
+
+class muBC : public BC<Compressible> {
+public:
+	using BC::BC; // C++11 directive for inheritance of BC class constructors
+	virtual ~muBC() {};
+	virtual void apply(Mesh const& m, Field<Compressible> & W);
+};
+
 class FreeBC : public BC<Compressible> {
 public:
 	using BC::BC; // C++11 directive for inheritance of BC class constructors
