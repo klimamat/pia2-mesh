@@ -2,6 +2,9 @@
 #include "Compressible.h"
 #include "Vector2D.h"
 #include <iostream>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 double Compressible::epsilon() const{
 	Vector2D u=rhoU/rho;
@@ -22,6 +25,7 @@ double Compressible::eos_e_from_p(double p) const {
 }
 
 Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
+	double g=0.1;
 	Compressible F=Wl;
 	
 	Vector2D ul=Wl.rhoU / Wl.rho;
@@ -39,6 +43,8 @@ Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
 	
 	F.rhoU = F.rhoU + pe*ne;
 	F.e = F.e + pe * dot(ue,ne);
+	
+	//F.rhoU.y+=F.rho*g;
 		
 	return F;
 }
@@ -83,7 +89,7 @@ Compressible fluxHLL(Compressible Wl, Compressible Wr, Vector2D ne){
 }
 
 double timestep(Mesh const& m, Field<Compressible> const& W) {
-	const double cfl = 0.9;
+	const double cfl = 0.3;
 	double dt = 1e12;
 	double dt_local_min;
 	
@@ -125,6 +131,8 @@ void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 	
 	Field<Compressible> res(m);
 	
+	double g=0.1;
+  
 	#pragma omp parallel for schedule(dynamic)
 	for (int i=0; i<m.edge.size(); ++i) {
 		auto const& e = m.edge[i];
@@ -144,6 +152,8 @@ void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 	
 	#pragma omp parallel for
 	for(int j=0;j<m.nc; ++j){
+		double const rho = W[j].rho;
 		W[j] = W[j]-(dt/m.cell[j].area())*res[j];
+		W[j].rhoU.y-=dt*rho*g;
 	}
 }
