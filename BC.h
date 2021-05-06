@@ -46,4 +46,11 @@ public:
 	virtual void apply(Mesh const& m, Field<Compressible> & W);
 };
 
+class FreeBC : public BC<Compressible> {
+public:
+	using BC::BC; // C++11 directive for inheritance of BC class constructors
+	virtual ~FreeBC() {};
+	virtual void apply(Mesh const& m, Field<Compressible> & W);
+};
+
 #endif

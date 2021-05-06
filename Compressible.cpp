@@ -1,6 +1,10 @@
+#include <omp.h>
 #include "Compressible.h"
 #include "Vector2D.h"
 #include <iostream>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 double Compressible::epsilon() const{
 	Vector2D u=rhoU/rho;
@@ -21,6 +25,7 @@ double Compressible::eos_e_from_p(double p) const {
 }
 
 Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
+	double g=0.1;
 	Compressible F=Wl;
 	
 	Vector2D ul=Wl.rhoU / Wl.rho;
@@ -38,14 +43,61 @@ Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
 	
 	F.rhoU = F.rhoU + pe*ne;
 	F.e = F.e + pe * dot(ue,ne);
+	
+	//F.rhoU.y+=F.rho*g;
 		
 	return F;
 }
 
-double timestep(Mesh const& m, Field<Compressible> const& W) {
-	const double cfl = 0.4;
-	double dt = 1e12;
+Compressible fluxHLL(Compressible Wl, Compressible Wr, Vector2D ne){
+	Vector2D nu = ne/ne.norm();
+	double ul = dot(Wl.u(),ne)/ne.norm(); double ur = dot(Wr.u(),ne)/ne.norm();
 	
+	double rhols = std::sqrt(Wl.rho); double rhors = std::sqrt(Wr.rho);
+	double ub = (rhols*ul + rhors*ur)/(rhols + rhors);
+	double Hl = (Wl.e + Wl.p())/Wl.rho; double Hr = (Wr.e + Wr.p())/Wr.rho;
+	double Hb = (rhols*Hl + rhors*Hr)/(rhols + rhors);
+	double ab = std::sqrt((Compressible::kappa - 1.0)*(Hb - 0.5*ub*ub));
+	double Sl = ub - ab; double Sr = ub + ab;
+	
+	Vector2D vl = Wl.u(); Vector2D vr = Wr.u();
+	Vector2D ve = 0.5*(vl+vr);
+	double pe=0.5*(Wl.p()+Wr.p());
+	
+	
+	Compressible F;
+	if (Sl >= 0.0) {
+		F = Wl * dot(vl,ne) + Compressible(0.0,Wl.p()*ne,Wl.p()*dot(vl,ne));
+    	//std::cout << "Fl = " << F.rho << " " << F.rhoU.norm() << " " << F.e << "\n";
+	}
+	else if (Sr <= 0.0) {
+		F = Wr * dot(vr,ne) + Compressible(0.0,Wr.p()*ne,Wr.p()*dot(vr,ne));
+    	//std::cout << "Fr = " << F.rho << " " << F.rhoU.norm() << " " << F.e << "\n";
+	}
+	else {
+		Compressible Fl = Wl * dot(vl,nu) + Compressible(0.0,Wl.p()*nu,Wl.p()*dot(vl,nu));
+		Compressible Fr = Wr * dot(vr,nu) + Compressible(0.0,Wr.p()*nu,Wr.p()*dot(vr,nu));
+		F = ne.norm()*(Sr*Fl - Sl*Fr + Sl*Sr*(Wr - Wl))/(Sr-Sl);
+    	/*if (Fl.rhoU.x != 0.0) {
+    		std::cout << "Sr = " << Sr << ", Sl = " << Sl << "\n";
+    		std::cout << "Fl = " << Fl.rho << " " << Fl.rhoU.x << " " << Fl.rhoU.y << " " << Fl.e << "\n";
+    		std::cout << "Fr = " << Fr.rho << " " << Fr.rhoU.x << " " << Fr.rhoU.y << " " << Fr.e << "\n";
+    		std::cout << "Fhll = " << F.rho << " " << F.rhoU.x << " " << F.rhoU.y << " " << F.e << "\n";
+        }*/
+	}
+	return F;
+}
+
+double timestep(Mesh const& m, Field<Compressible> const& W) {
+	const double cfl = 0.3;
+	double dt = 1e12;
+	double dt_local_min;
+	
+	#pragma omp parallel private(dt_local_min) shared(dt)
+	{
+	dt_local_min = 1e12;
+	
+	#pragma omp for
 	for (int i=0;i<m.nc;++i) {
 		Polygon const& p = m.cell[i];
 		Vector2D u = W[i].u(); // Fluid velocity
@@ -62,7 +114,14 @@ double timestep(Mesh const& m, Field<Compressible> const& W) {
 			lambda += std::fabs(dot(u,e.normal())) + c*e.norm();
 		}
 		double dt_i = cfl * p.area() / lambda;
-		if (dt_i < dt) dt = dt_i;
+		if (dt_i < dt_local_min) dt_local_min = dt_i;
+	}
+	
+	#pragma omp critical
+	{
+		if (dt_local_min < dt) dt = dt_local_min;
+	}
+	
 	}
 	
 	return dt;
@@ -72,17 +131,29 @@ void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 	
 	Field<Compressible> res(m);
 	
-	for (auto const& e : m.edge) {
+	double g=0.1;
+  
+	#pragma omp parallel for schedule(dynamic)
+	for (int i=0; i<m.edge.size(); ++i) {
+		auto const& e = m.edge[i];
 		int l = e.left();  // Index of the cell on the left
 		int r = e.right(); // Index of the cell on the right
-		Compressible F = fluxUpwind(W[l],W[r],e.normal());
-		res[l] = res[l] + F;
-		if (!e.boundary) {
-			res[r] = res[r] - F;
+		//Compressible F = fluxUpwind(W[l],W[r],e.normal());
+		Compressible F = fluxHLL(W[l],W[r],e.normal());
+		
+		#pragma omp critical
+		{
+			res[l] = res[l] + F;
+			if (!e.boundary) {
+				res[r] = res[r] - F;
+			}
 		}
 	}
 	
+	#pragma omp parallel for
 	for(int j=0;j<m.nc; ++j){
+		double const rho = W[j].rho;
 		W[j] = W[j]-(dt/m.cell[j].area())*res[j];
+		W[j].rhoU.y-=dt*rho*g;
 	}
 }

@@ -1,7 +1,7 @@
 all: mesh
 
 CPP = g++
-CPPFLAGS = -std=c++11 #-DDEBUG
+CPPFLAGS = -std=c++11 -fopenmp -O2 #-DDEBUG
 
 %.o: %.cpp
 	$(CPP) $(CPPFLAGS) -c -o $@ $<

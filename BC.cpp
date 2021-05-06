@@ -31,6 +31,19 @@ void ReservoirBC::apply(Mesh const& m, Field<Compressible> & W) {
 	}
 }
 
+void FreeBC::apply(Mesh const& m, Field<Compressible> & W) {
+	for (auto const& e : m.edge) {
+		if (isCorrectLocation(e.location)) {
+			int cl = e.left();  // Internal cell index
+			int cr = e.right(); // Ghost cell index
+			
+			W[cr].rho = W[cl].rho;
+			W[cr].rhoU = W[cl].rhoU;
+			W[cr].e = W[cl].e;
+		}
+	}
+}
+
 void puBC::apply(Mesh const& m, Field<Compressible> & W) {
 	for (auto const& e : m.edge) {
 		if (isCorrectLocation(e.location)) {
@@ -56,4 +69,3 @@ void muBC::apply(Mesh const& m, Field<Compressible> & W) {
 		}
 	}
 }
-
