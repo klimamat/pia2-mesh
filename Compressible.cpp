@@ -6,6 +6,8 @@
 #include <fstream>
 #include <string>
 
+double Compressible::g = 0.0;
+	
 double Compressible::epsilon() const{
 	Vector2D u=rhoU/rho;
 	double uSq=dot(u,u);
@@ -131,7 +133,7 @@ void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 	
 	Field<Compressible> res(m);
 	
-	double g=0.1;
+	double g = Compressible::g;
   
 	#pragma omp parallel for schedule(dynamic)
 	for (int i=0; i<m.edge.size(); ++i) {
@@ -153,7 +155,7 @@ void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 	#pragma omp parallel for
 	for(int j=0;j<m.nc; ++j){
 		double const rho = W[j].rho;
-		W[j] = W[j]-(dt/m.cell[j].area())*res[j];
-		W[j].rhoU.y-=dt*rho*g;
+		Compressible Fg = -Compressible::g*Compressible(0.0,0.0,W[j].rho,W[j].rhoU.y);
+		W[j] = W[j]-(dt/m.cell[j].area())*res[j] + dt*Fg;
 	}
 }

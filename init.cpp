@@ -84,6 +84,8 @@ void initKH(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>&
 }
 
 void initRayTay(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds, int reg) {
+	Compressible::g = 0.1;
+	
 	switch(reg){
 		case 1:
 			m = new MeshGmsh("RayTay_sparse.msh");
@@ -123,6 +125,8 @@ void initRayTay(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible
 }
 
 void initRayTayCos(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds, int reg) {
+	Compressible::g = 0.1;
+	
 	switch(reg){
 		case 1:
 			m = new MeshGmsh("RayTay_sparse.msh");

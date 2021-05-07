@@ -11,6 +11,7 @@ public:
     Compressible(double _rho, double _rhoux, double _rhouy, double _e) : rho(_rho), rhoU(_rhoux,_rhouy), e(_e) {};
     Compressible(double _rho, Vector2D _rhou, double _e) : rho(_rho), rhoU(_rhou), e(_e) {};
 	constexpr static double kappa = 1.4;
+	static double g;
     double rho, e;
     Vector2D rhoU;
     double epsilon() const;

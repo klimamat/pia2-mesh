@@ -19,10 +19,11 @@ int main(int iargc, char* iargv[]) {
     
 	//initSod(m,W,boundary_conds);
 	//initJet(m,W,boundary_conds);
-	initRayTayCos(m,W,boundary_conds,1);//1-sparse, 0-dense, 2-double dense
+	//initRayTayCos(m,W,boundary_conds,1);//1-sparse, 0-dense, 2-double dense
+	initKH(m,W,boundary_conds);
 	
 	double dt, t = 0.0;
-	const double t_max = 85.0, tSavePer = 0.1;
+	const double t_max = 1.0, tSavePer = 0.1;
 	int n = 0;
 		
 	outputVTK("output_init.vtk",*m,*W);
