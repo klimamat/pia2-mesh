@@ -11,5 +11,5 @@ void initJet(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>
 void initKH(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds); 
 void initRayTay(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds, int reg); 
 void initRayTayCos(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds, int reg); 
-
+void initGAMM(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds);
 #endif
