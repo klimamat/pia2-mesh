@@ -1,7 +1,5 @@
 #include "init.h"
 #include "MeshGmsh.h"
-
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds) {
@@ -15,7 +13,7 @@ void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>
 		Polygon const& T_x = m->cell[i];
 		double rho, e, p;
 		Vector2D u;
-		if(T_x.centroid().x < 0.5){
+		if(T_x.centroid().x < 0.5){	
 			rho = 1.0;
 			u = {0.0,0.0};
 			p = 1.0;
@@ -36,8 +34,8 @@ void initSod(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>
 void initJet(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds) {
 	m = new MeshGmsh("jet.msh");
 	W = new Field<Compressible>(*m); 
-	boundary_conds.push_back(new SlipWallBC({1}));
-	boundary_conds.push_back(new ReservoirBC({2}));
+	boundary_conds.push_back(new SlipWallBC({1}));	// 1 = ozanceni indexu fyzické hranice z gmsh
+	boundary_conds.push_back(new ReservoirBC({2}));	// 2 = ozanceni indexu fyzické hranice z gmsh (vtok)
 			
 	for (int i=0; i<m->nc; ++i) {
 		Polygon const& T_x = m->cell[i];
@@ -49,120 +47,30 @@ void initJet(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>
 	
 	for (auto bc : boundary_conds) bc->apply(*m,*W);				
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void initKH(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds) {
-	m = new MeshGmsh("KelvinHelmholtz_3x05.msh");
-	W = new Field<Compressible>(*m); 
-	boundary_conds.push_back(new SlipWallBC({9}));  //horni
-	boundary_conds.push_back(new SlipWallBC({10})); //dolni
-	boundary_conds.push_back(new puBC({11})); //levo dole
-	boundary_conds.push_back(new muBC({12})); //pravo hore
-	boundary_conds.push_back(new puBC({13})); //pravo dole
-	boundary_conds.push_back(new muBC({14}));	//levo hore	
-
-
-	for (int i=0; i<m->nc; ++i) {
-		Polygon const& T = m->cell[i];
-		double rho, e, p;
-		Vector2D u;
-		if(T.centroid().y < 0.25){
-			rho = 1.0;
-			u = {0.5,0.0};
-			p = 2.5;
-		}
-		else{
-			rho = 2.0;
-			u = {-0.5,0.0};
-			p = 2.5;
-		}
-			(*W)[i].rho = rho;
-			(*W)[i].rhoU = rho*u;
-			(*W)[i].e = (*W)[i].eos_e_from_p(p);
-	}			
+void initGAMM(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds){
 	
-	for (auto bc : boundary_conds) bc->apply(*m,*W);				
-}
-
-void initRayTay(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds, int reg) {
-	Compressible::g = 0.1;
+	double gama=1.4;
 	
-	switch(reg){
-		case 1:
-			m = new MeshGmsh("RayTay_sparse.msh");
-			break;
-		case 0:
-			m = new MeshGmsh("RayTay_dense.msh");
-			break;
-		case 2:
-			m = new MeshGmsh("RayTay_double_dense.msh");
-			break;
-		default:
-			std::cout << "*.msh file not found.";
-	}
+	m = new MeshGmsh("GAMM2,7H.msh");
+	W = new Field<Compressible>(*m);
+	boundary_conds.push_back(new SlipWallBC({10}));
+	boundary_conds.push_back(new SlipWallBC({13}));
 	
-	W = new Field<Compressible>(*m); 
-	boundary_conds.push_back(new SlipWallBC({1}));
-	double yPol, p, rho1=2.0, rho2=1.0, g=0.1;	
-	for (int i=0; i<m->nc; ++i) {
+	boundary_conds.push_back(new InletBC({11}));
+	
+	boundary_conds.push_back(new OutletBC({12}));
+	
+	
+		for (int i=0; i<m->nc; ++i) {
 		Polygon const& T_x = m->cell[i];
-	    yPol = T_x.centroid().y;
-		if (yPol > 0.5){
-			(*W)[i].rho = 2.0;
-			(*W)[i].rhoU = Vector2D(0.0,0.0);
-			p = 1.0 + (1.0-yPol) * rho1 * g;
-			(*W)[i].e = (*W)[i].eos_e_from_p(p);
-		}else{
-			(*W)[i].rho = 1.0;
-			(*W)[i].rhoU = Vector2D(0.0,0.0);
-			p = 1.0 + (0.5*rho1+(1.0-yPol) * rho2)*g;
-			(*W)[i].e = (*W)[i].eos_e_from_p(p);
-		}
-			
-			
-	}			
-	
-	for (auto bc : boundary_conds) bc->apply(*m,*W);				
-}
-
-void initRayTayCos(Mesh *& m, Field<Compressible> *& W, std::vector<BC<Compressible>*>& boundary_conds, int reg) {
-	Compressible::g = 0.1;
-	
-	switch(reg){
-		case 1:
-			m = new MeshGmsh("RayTay_sparse.msh");
-			break;
-		case 0:
-			m = new MeshGmsh("RayTay_dense.msh");
-			break;
-		case 2:
-			m = new MeshGmsh("RayTay_double_dense.msh");
-			break;
-		default:
-			std::cout << "*.msh file not found.";
-	}
 		
-	W = new Field<Compressible>(*m); 
-	boundary_conds.push_back(new SlipWallBC({1}));
-	if(reg==3)boundary_conds.push_back(new ReservoirBC({2}));
-	double yPol, xPol, yLim, p, rho1=2.0, rho2=1.0, g=0.1;
-	double a=0.05, c=0.5, b=2.0*M_PI/0.1666;
-	for (int i=0; i<m->nc; ++i) {
-		Polygon const& T_x = m->cell[i];
-	    yPol = T_x.centroid().y;
-	    xPol = T_x.centroid().x;
-	    yLim = a*cos(b*xPol)+c;
-		if (yPol > yLim){
-			(*W)[i].rho = 2.0;
+			(*W)[i].rho = 1.1845;
+			(*W)[i].e = (*W)[i].eos_e_from_p(101391.8555);
 			(*W)[i].rhoU = Vector2D(0.0,0.0);
-			p = 1.0 + (1.0-yPol) * rho1 * g;
-			(*W)[i].e = (*W)[i].eos_e_from_p(p);
-		}else{
-			(*W)[i].rho = 1.0;
-			(*W)[i].rhoU = Vector2D(0.0,0.0);
-			p = 1.0 + (0.5*rho1+(1.0-yPol) * rho2)*g;
-			(*W)[i].e = (*W)[i].eos_e_from_p(p);
-		}
-	}			
-	
+		
+		}	
+
 	for (auto bc : boundary_conds) bc->apply(*m,*W);				
 }

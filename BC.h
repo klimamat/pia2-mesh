@@ -31,26 +31,21 @@ public:
 	virtual ~ReservoirBC() {};
 	virtual void apply(Mesh const& m, Field<Compressible> & W);
 };
-
-class puBC : public BC<Compressible> {
+///////////////////////////////////////////////////////////////////////////////////////////////
+class InletBC : public BC<Compressible> {
 public:
 	using BC::BC; // C++11 directive for inheritance of BC class constructors
-	virtual ~puBC() {};
+	virtual ~InletBC() {};
 	virtual void apply(Mesh const& m, Field<Compressible> & W);
 };
 
-class muBC : public BC<Compressible> {
+class OutletBC : public BC<Compressible> {
 public:
 	using BC::BC; // C++11 directive for inheritance of BC class constructors
-	virtual ~muBC() {};
+	virtual ~OutletBC() {};
 	virtual void apply(Mesh const& m, Field<Compressible> & W);
 };
 
-class FreeBC : public BC<Compressible> {
-public:
-	using BC::BC; // C++11 directive for inheritance of BC class constructors
-	virtual ~FreeBC() {};
-	virtual void apply(Mesh const& m, Field<Compressible> & W);
-};
+
 
 #endif
