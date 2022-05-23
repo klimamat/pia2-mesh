@@ -51,6 +51,41 @@ Compressible fluxUpwind(Compressible Wl, Compressible Wr, Vector2D ne){
 	return F;
 }
 
+Compressible fluxNS(Compressible Wl, Compressible Wr, Vector2D ne, Point rl, Point rr){
+	double mu =1.0e-6;
+	Compressible F=Wl;
+	Vector2D tau;
+	Vector2D taux;
+	Vector2D tauy;
+	double tauU;
+	
+	Vector2D ul=Wl.rhoU / Wl.rho;
+	Vector2D ur=Wr.rhoU / Wr.rho;
+	Vector2D ue = 0.5*(ul+ur);
+	
+	if(dot(ue,ne)<0){
+		F=Wr;
+	}
+	
+	F = F * dot(ue,ne); 
+	
+	double pe=0.5*(Wl.p()+Wr.p());
+	double uxx=(ur.x-ul.x)/(rr.x-rl.x);  	// dux/dx
+	double uxy=(ur.x-ul.x)/(rr.y-rl.y);	// dux/dy		
+	double uyy=(ur.y-ul.y)/(rr.y-rl.y);	// duy/dy
+	double uyx=(ur.y-ul.y)/(rr.x-rl.x);	// duy/dx
+	
+	 tau.x=mu*((2*uxx-(2/3)*(uxx+uyy))*ne.x+(uxy+uyx)*ne.y);
+	 tau.y=mu*((uxy+uyx)*ne.x+(2*uyy-(2/3)*(uxx+uyy))*ne.y);
+	 tauU=mu*( (2*uxx-(2/3)*(uxx+uyy))*ue.x*ne.x+(uxy+uyx)*ue.y*ne.x+(uxy+uyx)*ue.x*ne.y+(2*uyy-(2/3)*(uxx+uyy))*ue.y*ne.y );
+	
+	F.rhoU = F.rhoU + pe*ne-tau;
+	F.e = F.e + pe * dot(ue,ne)-tauU;	
+		
+	return F;
+}
+
+
 Compressible fluxHLL(Compressible Wl, Compressible Wr, Vector2D ne){
 	Vector2D nu = ne/ne.norm();
 	double ul = dot(Wl.u(),ne)/ne.norm(); double ur = dot(Wr.u(),ne)/ne.norm();
@@ -141,7 +176,8 @@ void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 		int l = e.left();  // Index of the cell on the left
 		int r = e.right(); // Index of the cell on the right
 		//Compressible F = fluxUpwind(W[l],W[r],e.normal());
-		Compressible F = fluxHLL(W[l],W[r],e.normal());
+		//Compressible F = fluxHLL(W[l],W[r],e.normal());
+		Compressible F = fluxNS(W[l],W[r],e.normal(),m.cell[l].centroid(),m.cell[r].centroid());
 		
 		#pragma omp critical
 		{
