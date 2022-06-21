@@ -9,11 +9,11 @@ public:
 	BC(std::vector<int> loc_in) : locations(loc_in) {};
 	virtual ~BC() {};
 	std::vector<int> locations;
-	bool isCorrectLocation(int loc) { 
-		for (int l : locations) { 
+	bool isCorrectLocation(int loc) {
+		for (int l : locations) {
 			if (l==loc) return true;
-		} 
-		return false; 
+		}
+		return false;
 	};
 	virtual void apply(Mesh const& m, Field<Compressible> & W) = 0;
 };
@@ -50,6 +50,13 @@ class FreeBC : public BC<Compressible> {
 public:
 	using BC::BC; // C++11 directive for inheritance of BC class constructors
 	virtual ~FreeBC() {};
+	virtual void apply(Mesh const& m, Field<Compressible> & W);
+};
+//na desku dole vpravo
+class vazDeskBC : public BC<Compressible> {
+public:
+	using BC::BC; // C++11 directive for inheritance of BC class constructors
+	virtual ~vazDeskBC() {};
 	virtual void apply(Mesh const& m, Field<Compressible> & W);
 };
 
