@@ -20,6 +20,21 @@ void SlipWallBC::apply(Mesh const& m, Field<Compressible> & W) {
 		}
 	}
 }
+void vazDeskBC::apply(Mesh const& m, Field<Compressible> & W) {
+	for (auto const& e : m.edge) {
+		if (isCorrectLocation(e.location)) {
+            int cl = e.left();  // Internal cell index
+			int cr = e.right(); // Ghost cell index
+
+			Vector2D ur = -1.0 * W[cl].u(); // Velocity vector is zero along the perfect viscous wall
+
+			W[cr].rho = W[cl].rho;
+			W[cr].rhoU = W[cl].rho * ur;
+			W[cr].e = W[cl].e;
+
+		}
+	}
+}
 void ReservoirBC::apply(Mesh const& m, Field<Compressible> & W) {
 	for (auto const& e : m.edge) {
 		if (isCorrectLocation(e.location)) {
@@ -45,7 +60,7 @@ void FreeBC::apply(Mesh const& m, Field<Compressible> & W) {
 		}
 	}
 }
-//vystup
+
 void puBC::apply(Mesh const& m, Field<Compressible> & W) {
 	for (auto const& e : m.edge) {
 		if (isCorrectLocation(e.location)) {
@@ -59,7 +74,7 @@ void puBC::apply(Mesh const& m, Field<Compressible> & W) {
 		}
 	}
 }
-//vstup
+
 void muBC::apply(Mesh const& m, Field<Compressible> & W) {
 	for (auto const& e : m.edge) {
 		if (isCorrectLocation(e.location)) {
@@ -80,21 +95,4 @@ void muBC::apply(Mesh const& m, Field<Compressible> & W) {
 		}
 	}
 }
-//tady vazkost
-void vazDeskBC::apply(Mesh const& m, Field<Compressible> & W) {
-	for (auto const& e : m.edge) {
-		if (isCorrectLocation(e.location)) {
-            int cl = e.left();  // Internal cell index
-			int cr = e.right(); // Ghost cell index
 
-			Vector2D en = e.unitNormal();
-			Vector2D un = en*dot(W[cl].u(),en); // Normal component of the fluid velocity relative to the edge
-			Vector2D ur = W[cl].u() - 2.0*un; // Velocity vector mirrored along the edge
-
-			W[cr].rho = W[cl].rho;
-			W[cr].rhoU = 0 * ur;
-			W[cr].e = W[cl].e;
-
-		}
-	}
-}
