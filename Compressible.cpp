@@ -176,9 +176,9 @@ void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 		//Compressible F = fluxUpwind(W[l],W[r],e.normal());
 		Compressible F = fluxHLL(W[l],W[r],e.normal());
 
-		if (!e.boundary) {
-		F = F - fluxNS(W[l],W[r],e.normal(),m.cell[l].centroid(),m.cell[r].centroid());
-		}
+//		if (!e.boundary) {
+//		F = F - fluxNS(W[l],W[r],e.normal(),m.cell[l].centroid(),m.cell[r].centroid());
+//		}
 		#pragma omp critical
 		{
 			res[l] = res[l] + F;
@@ -190,8 +190,8 @@ void FVMstep(Mesh const& m, Field<Compressible> & W, double dt) {
 
 	#pragma omp parallel for
 	for(int j=0;j<m.nc; ++j){
-		double const rho = W[j].rho;
-		Compressible Fg = -Compressible::g*Compressible(0.0,0.0,W[j].rho,W[j].rhoU.y);
-		W[j] = W[j]-(dt/m.cell[j].area())*res[j] + dt*Fg;
+//		double const rho = W[j].rho;
+//		Compressible Fg = -Compressible::g*Compressible(0.0,0.0,W[j].rho,W[j].rhoU.y);
+		W[j] = W[j]-(dt/m.cell[j].area())*res[j]; // + dt*Fg;
 	}
 }

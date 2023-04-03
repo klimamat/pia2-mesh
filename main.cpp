@@ -15,15 +15,18 @@ int main(int iargc, char* iargv[]) {
     Field<Compressible> *W;
     std::vector<BC<Compressible>*> boundary_conds; // Array of boundary conditions
     
-    //feenableexcept(FE_DIVBYZERO || FE_INVALID || FE_OVERFLOW);
-    
-	//initSod(m,W,boundary_conds);
+    feenableexcept(FE_DIVBYZERO || FE_INVALID || FE_OVERFLOW);
+
 	//initJet(m,W,boundary_conds);
 	//initRayTayCos(m,W,boundary_conds,1);//1-sparse, 0-dense, 2-double dense
+    
+	//initSod(m,W,boundary_conds);
+    //const double t_max = 0.2; tSavePer = 0.2;
+
 	initKH(m,W,boundary_conds);
+	const double t_max = 30.0, tSavePer = 1.0;
 	
 	double dt, t = 0.0;
-	const double t_max = 1.0, tSavePer = 0.1;
 	int n = 0;
 		
 	outputVTK("output_init.vtk",*m,*W);
@@ -38,13 +41,13 @@ int main(int iargc, char* iargv[]) {
 		
 		n++;
 		t += dt;
-		if(n%2000 == 0) std::cout << roundf(t*100./t_max) <<"% Step " << n << ", time = " << t << "/" << t_max << "" ", dt = " << dt << "\n";
+		if(n%20 == 0) std::cout << roundf(t*100./t_max) <<"% Step " << n << ", time = " << t << "/" << t_max << "" ", dt = " << dt << "\n";
 		
 		if(int(t*1000)%int(tSavePer*1000) == 0) outputVTKTimeStep(t,*m,*W);
 		
 	}
 
-	//outputVTK("output.vtk",*m,*W);
+	outputVTK("output.vtk",*m,*W);
 
 	delete m; delete W;
 	for (auto bc : boundary_conds) delete bc;

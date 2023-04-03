@@ -32,6 +32,15 @@ public:
 	virtual void apply(Mesh const& m, Field<Compressible> & W);
 };
 
+class ConstVelocityBC : public BC<Compressible> {
+public:
+	ConstVelocityBC(std::vector<int> loc_in, Vector2D velocity_in) : BC(loc_in), velocity(velocity_in) {};
+	virtual ~ConstVelocityBC() {};
+	virtual void apply(Mesh const& m, Field<Compressible> & W);
+private:
+    Vector2D velocity;
+};
+
 class puBC : public BC<Compressible> {
 public:
 	using BC::BC; // C++11 directive for inheritance of BC class constructors
